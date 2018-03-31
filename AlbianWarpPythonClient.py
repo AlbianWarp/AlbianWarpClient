@@ -16,11 +16,11 @@ url = config.get('albianwarp', "url", fallback="http://192.168.0.29:5000")
 server_version = "alpha alpaca"
 mod_version = "alpha alpaca"
 print("Checking for game modification version...")
-if eame_aw_mod_version == 0:
+if eame_aw_mod_version == "":
     logging.error("Game modifications are not Installed! :(")
     exit(1)
 elif eame_aw_mod_version != mod_version:
-    logging.error("Wrong modification version found! Expected %s found %s instead" % (game_aw_mod_version, mod_version))
+    logging.error("Wrong modification version found! Expected %s found %s instead" % (eame_aw_mod_version, mod_version))
     exit(1)
 
 print("Server version check...")
@@ -46,7 +46,7 @@ print(CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 mesg writ targ 500 next").
 while True:
     available_messages = requests.get("%s/messages" % url, auth=HTTPBasicAuth(username, password))
     if available_messages.status_code == 200:
-        CI.ExecuteCaos("enum 1 2 14 mesg writ targ 500 next")
+        game_aw_online_indicator.Value = 1
     for message_id in available_messages.json()['messages']:
         message = requests.get("%s/message/%s" % (url, message_id), auth=HTTPBasicAuth(username, password)).json()
         CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")

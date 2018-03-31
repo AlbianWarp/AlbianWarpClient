@@ -1,4 +1,5 @@
 from CaosEvolution import CI
+import logging
 
 class StringGameVariable:
 
@@ -45,7 +46,7 @@ game_aw_status = StringGameVariable("aw_status")
 # the original username variable, it stores the username of the logged in user, also set by AW for compatibillity reason
 game_user_of_this_world = StringGameVariable("user_of_this_world")
 # online connectivity indicator variable
-game_aw_connectivity_inidcator = IntegerGameVariable("aw_connectivity_inidcator")
+game_aw_online_indicator = IntegerGameVariable("aw_online_indicator")
 # endregion
 
 # region engine Variables
