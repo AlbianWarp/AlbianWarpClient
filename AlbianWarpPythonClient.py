@@ -6,12 +6,13 @@ from requests.auth import HTTPBasicAuth
 import time
 import logging
 import configparser
+
 config = configparser.ConfigParser()
 config.read('albianwarp.cfg')
 
-username = config.get('albianwarp',"username",fallback="")
-password = config.get('albianwarp',"password",fallback="")
-url = config.get('albianwarp',"url",fallback="http://192.168.0.29:5000")
+username = config.get('albianwarp', "username", fallback="")
+password = config.get('albianwarp', "password", fallback="")
+url = config.get('albianwarp', "url", fallback="http://192.168.0.29:5000")
 server_version = "alpha alpaca"
 mod_version = "alpha alpaca"
 print("Checking for game modification version...")
@@ -19,14 +20,14 @@ if eame_aw_mod_version == 0:
     logging.error("Game modifications are not Installed! :(")
     exit(1)
 elif eame_aw_mod_version != mod_version:
-    logging.error("Wrong modification version found! Expected %s found %s instead" % (game_aw_mod_version, mod_version) )
+    logging.error("Wrong modification version found! Expected %s found %s instead" % (game_aw_mod_version, mod_version))
     exit(1)
 
 print("Server version check...")
 actual_version = requests.get("%s/version" % url).text
 if actual_version != server_version:
     print("Server and Client Version mismatch, are you running the latest/correct client version?")
-    logging.error('Server Version does not match! Expected "%s", found "%s"' % (server_version,actual_version) )
+    logging.error('Server Version does not match! Expected "%s", found "%s"' % (server_version, actual_version))
     exit(1)
 auth_test = requests.get("%s/messages" % url, auth=HTTPBasicAuth(username, password))
 while auth_test.status_code != 200:
@@ -47,11 +48,12 @@ while True:
     if available_messages.status_code == 200:
         CI.ExecuteCaos("enum 1 2 14 mesg writ targ 500 next")
     for message_id in available_messages.json()['messages']:
-        message = requests.get("%s/message/%s" % (url,message_id), auth=HTTPBasicAuth(username, password)).json()
+        message = requests.get("%s/message/%s" % (url, message_id), auth=HTTPBasicAuth(username, password)).json()
         CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
         if AgentBuilder(1, 1, 35754, message).inject().Success:
             print("INJECTED incoming DM: %s" % message)
-            if not requests.delete("%s/message/%s" % (url,message_id), auth=HTTPBasicAuth(username, password)).status_code == 200:
+            if not requests.delete("%s/message/%s" % (url, message_id),
+                                   auth=HTTPBasicAuth(username, password)).status_code == 200:
                 logging.error("could not delete message %s" % message)
         CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
     for agent in enumAgents(1, 1, 35753):
