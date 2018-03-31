@@ -1,5 +1,4 @@
 from CaosEvolution import CI
-import logging
 
 class StringGameVariable:
 

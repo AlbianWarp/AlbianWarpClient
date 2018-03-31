@@ -4,8 +4,9 @@ from CaosEvolution import CI
 import requests
 from requests.auth import HTTPBasicAuth
 import time
-import logging
 import configparser
+import logging
+
 
 config = configparser.ConfigParser()
 config.read('albianwarp.cfg')
