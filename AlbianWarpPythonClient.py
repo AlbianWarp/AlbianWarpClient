@@ -24,7 +24,7 @@ elif eame_aw_mod_version != mod_version:
 
 print("Server version check...")
 actual_version = requests.get("%s/version" % url).text
-if  actual_version != server_version:
+if actual_version != server_version:
     print("Server and Client Version mismatch, are you running the latest/correct client version?")
     logging.error('Server Version does not match! Expected "%s", found "%s"' % (server_version,actual_version) )
     exit(1)
