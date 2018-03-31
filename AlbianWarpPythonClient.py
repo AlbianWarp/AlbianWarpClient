@@ -10,7 +10,7 @@ username = ""
 password = ""
 url = "http://192.168.0.29:5000"
 server_version = "alpha alpaca"
-mod_version = 1
+mod_version = "alpha alpaca"
 
 print("Checking for game modification version...")
 if eame_aw_mod_version == 0:

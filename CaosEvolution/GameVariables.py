@@ -50,5 +50,5 @@ game_aw_connectivity_inidcator = IntegerGameVariable("aw_connectivity_inidcator"
 
 # region engine Variables
 # version of the ingame CAOS modifications
-eame_aw_mod_version = int(CI.ExecuteCaos('outv eame "aw_mod_version"').Content.strip('\x00'))
+eame_aw_mod_version = CI.ExecuteCaos('outs eame "aw_mod_version"').Content.strip('\x00')
 # endregion
