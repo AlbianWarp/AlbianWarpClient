@@ -5,13 +5,15 @@ import requests
 from requests.auth import HTTPBasicAuth
 import time
 import logging
+import configparser
+config = configparser.ConfigParser()
+config.read('albianwarp.cfg')
 
-username = ""
-password = ""
-url = "http://192.168.0.29:5000"
+username = config.get('albianwarp',"username",fallback="")
+password = config.get('albianwarp',"password",fallback="")
+url = config.get('albianwarp',"url",fallback="http://192.168.0.29:5000")
 server_version = "alpha alpaca"
 mod_version = "alpha alpaca"
-
 print("Checking for game modification version...")
 if eame_aw_mod_version == 0:
     logging.error("Game modifications are not Installed! :(")
@@ -29,7 +31,6 @@ if  actual_version != server_version:
 auth_test = requests.get("%s/messages" % url, auth=HTTPBasicAuth(username, password))
 while auth_test.status_code != 200:
     username = input('Please enter your username: ')
-    print("d")
     password = input('Please enter your password: ')
     auth_test = requests.get("%s/messages" % url, auth=HTTPBasicAuth(username, password))
     if auth_test.status_code != 200:
