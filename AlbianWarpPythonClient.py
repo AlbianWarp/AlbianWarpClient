@@ -51,8 +51,12 @@ while True:
     for message_id in available_messages.json()['messages']:
         message = requests.get("%s/message/%s" % (url, message_id), auth=HTTPBasicAuth(username, password)).json()
         CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
-        if AgentBuilder(1, 1, 35754, message).inject().Success:
-            print("INJECTED incoming DM: %s" % message)
+        try:
+            if AgentBuilder(1, 1, 35754, message).inject().Success:
+                print("INJECTED incoming DM: %s" % message)
+        except Exception as e:
+            logging.error(e)
+        finally:
             if not requests.delete("%s/message/%s" % (url, message_id),
                                    auth=HTTPBasicAuth(username, password)).status_code == 200:
                 logging.error("could not delete message %s" % message)
