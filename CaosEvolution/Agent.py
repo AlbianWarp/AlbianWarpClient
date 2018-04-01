@@ -18,7 +18,7 @@ class AgentBuilder:
             if type(value) in [float,int]:
                 self.caos += 'setv name "%s" %s\n' % (key, value)
             if type(value) == str:
-                self.caos += 'sets name "%s" "%s"\n' % (key, value)
+                self.caos += 'sets name "%s" "%s"\n' % (key, value.replace('\n', r'\n'))
         return CI.ExecuteCaos(self.caos)
 
 def enumAgents(family, genus, species):
@@ -85,7 +85,7 @@ class Agent:
     @property
     def _json(self):
         return CI.ExecuteCaos(
-            r'targ agnt %s sets va00 "" outs "{" loop namn va00  doif va00 ne "" outs "\"" outs va00 outs "\": " setv va10 type name va00 doif va10 eq 2 outs "\"" outs name va00 outs "\"" elif va10 lt 2 outv name va00 endi outs "," endi untl va00 eq "" outs "}"' % self.unid).Content.strip(
+            r'targ agnt %s sets va00 "" outs "{" loop namn va00  doif va00 ne "" outs "\"" outs va00 outs "\": " setv va10 type name va00 doif va10 eq 2 outx name va00  elif va10 lt 2 outv name va00 endi outs "," endi untl va00 eq "" outs "}"' % self.unid).Content.strip(
             '\x00').replace(',}', '}')
 
     @property
