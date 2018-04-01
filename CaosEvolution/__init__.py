@@ -7,7 +7,7 @@ clr.AddReference('CAOS')
 from CAOS import *
 
 
-class CleanCaosInjector(CaosInjector):
+class LoggingCaosInjector(CaosInjector):
     def __init__(self, game_name):
         logging.info('initializing CaosInjector')
         super().__init__(game_name)
@@ -19,5 +19,4 @@ class CleanCaosInjector(CaosInjector):
         logging.debug(result.Content)
         return result
 
-
-CI = CleanCaosInjector('Docking Station')
+CI = LoggingCaosInjector('Docking Station')

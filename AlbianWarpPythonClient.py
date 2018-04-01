@@ -21,7 +21,7 @@ if eame_aw_mod_version == "":
     logging.error("Game modifications are not Installed! :(")
     exit(1)
 elif eame_aw_mod_version != mod_version:
-    logging.error("Wrong modification version found! Expected %s found %s instead" % (eame_aw_mod_version, mod_version))
+    logging.error("Wrong modification version found! Expected %s found %s instead" % (mod_version, eame_aw_mod_version))
     exit(1)
 
 print("Server version check...")
@@ -40,8 +40,8 @@ while auth_test.status_code != 200:
 print("going online...")
 CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
 game_user_of_this_world.Value = "username"
-game_status = "online"
-game_aw_status = "online"
+game_status.Value = "online"
+game_aw_status.Value = "online"
 print("running...")
 print(CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 mesg writ targ 500 next").Content)
 while True:
