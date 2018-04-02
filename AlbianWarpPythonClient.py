@@ -79,10 +79,17 @@ while True:
     # Parse send creature agents
     for agent in enumAgents(1, 1, 35760):
         tmp = agent.dict
-        print(tmp)
-        print("DETECTED SCA: %s" % agent.unid)
+        logging.debug("Processing %s" % tmp)
+        logging.debug("DETECTED SCA: %s" % agent.unid)
         creature_file = os.path.join(my_creatures_directory,"%s.ds.creature" % tmp['moniker'].replace('-','_'))
         if os.path.isfile(creature_file):
-            print('Found creature to warp at "%s"' % creature_file)
-
+            logging.debug('Found creature to warp at "%s"' % creature_file)
+            files = {'file': open(creature_file, 'rb')}
+            values = {'recipient': tmp['aw_recipient'], 'creature_name': tmp['creature_name']}
+            r = requests.post("%s/creature_upload" % url, files=files, data=values, auth=HTTPBasicAuth(username, password))
+            if r.status_code == 200:
+                logging.info("uploaded creature %s to %s" % (tmp['moniker'], tmp['aw_recipient']))
+            else:
+                logging.error("uploading creature %s to %s FAILED" % (tmp['moniker'], tmp['aw_recipient']))
+            agent.Kill()
     time.sleep(1)
