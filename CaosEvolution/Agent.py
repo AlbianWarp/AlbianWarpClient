@@ -26,7 +26,7 @@ def enumAgents(family, genus, species):
     result = CI.ExecuteCaos('enum %s %s %s outv unid outs \"|\" next' % (family, genus, species))
     if result.Content.strip('|\x00').strip() != "":
         for unid in result.Content.strip('|\x00').split('|'):
-            logging.info("enumerated %s %s %s  - unid: %s" % (family, genus, species, unid))
+            logging.debug("enumerated %s %s %s  - unid: %s" % (family, genus, species, unid))
             tmp.append(Agent(unid))
     return tmp
 

@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 import time
 import configparser
 import logging
-
+import os
 
 config = configparser.ConfigParser()
 config.read('albianwarp.cfg')
@@ -14,8 +14,12 @@ config.read('albianwarp.cfg')
 username = config.get('albianwarp', "username", fallback="")
 password = config.get('albianwarp', "password", fallback="")
 url = config.get('albianwarp', "url", fallback="http://192.168.0.29:5000")
+my_creatures_directory = config.get("albianwarp", "my_creatures_directory",
+                   fallback=r"C:\Users\%s\Documents\Creatures\Docking Station\My Creatures" % os.getlogin())
 server_version = "alpha alpaca"
 mod_version = "alpha alpaca"
+print('"My Creatures" directory: "%s"' % my_creatures_directory)
+
 print("Checking for game modification version...")
 if eame_aw_mod_version == "":
     logging.error("Game modifications are not Installed! :(")
@@ -53,7 +57,7 @@ while True:
         CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
         try:
             if AgentBuilder(1, 1, 35754, message).inject().Success:
-                print("INJECTED incoming DM: %s" % message)
+                print("INJECTED incoming DMA: %s" % message)
         except Exception as e:
             logging.error(e)
         finally:
@@ -61,14 +65,24 @@ while True:
                                    auth=HTTPBasicAuth(username, password)).status_code == 200:
                 logging.error("could not delete message %s" % message)
         CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
+    # Parse direct message agents
     for agent in enumAgents(1, 1, 35753):
-        print("DETECTED outgoing DM: %s" % agent.unid)
+        print("DETECTED outgoing DMA: %s" % agent.unid)
         CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
         tmp = agent.dict
         logging.info("Agent %s found: %s" % (agent.unid, tmp))
         result = requests.post("%s/messages" % url, auth=HTTPBasicAuth(username, password), json=tmp)
         if result.status_code == 200:
-            print("SENT DM (%s): %s" % (agent.unid, tmp))
+            print("SENT DMA (%s): %s" % (agent.unid, tmp))
             agent.Kill()
         CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
-    time.sleep(5)
+    # Parse send creature agents
+    for agent in enumAgents(1, 1, 35760):
+        tmp = agent.dict
+        print(tmp)
+        print("DETECTED SCA: %s" % agent.unid)
+        creature_file = os.path.join(my_creatures_directory,"%s.ds.creature" % tmp['moniker'].replace('-','_'))
+        if os.path.isfile(creature_file):
+            print('Found creature to warp at "%s"' % creature_file)
+
+    time.sleep(1)
