@@ -43,7 +43,7 @@ while auth_test.status_code != 200:
         print('Wrong username or password, please try again!')
 print("going online...")
 CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
-game_user_of_this_world.Value = "username"
+game_user_of_this_world.Value = username
 game_status.Value = "online"
 game_aw_status.Value = "online"
 print("running...")
@@ -86,8 +86,8 @@ while True:
             logging.debug('Found creature to warp at "%s"' % creature_file)
             files = {'file': open(creature_file, 'rb')}
             values = {'recipient': tmp['aw_recipient'], 'creature_name': tmp['creature_name']}
-            r = requests.post("%s/creature_upload" % url, files=files, data=values, auth=HTTPBasicAuth(username, password))
-            if r.status_code == 200:
+            result = requests.post("%s/creature_upload" % url, files=files, data=values, auth=HTTPBasicAuth(username, password))
+            if result.status_code == 200:
                 logging.info("uploaded creature %s to %s" % (tmp['moniker'], tmp['aw_recipient']))
             else:
                 logging.error("uploading creature %s to %s FAILED" % (tmp['moniker'], tmp['aw_recipient']))
