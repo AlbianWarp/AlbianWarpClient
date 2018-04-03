@@ -49,9 +49,8 @@ game_aw_status.Value = "online"
 print("running...")
 print(CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 mesg writ targ 500 next").Content)
 while True:
+    game_aw_online_indicator.Value = 1
     available_messages = requests.get("%s/messages" % url, auth=HTTPBasicAuth(username, password))
-    if available_messages.status_code == 200:
-        game_aw_online_indicator.Value = 1
     for message_id in available_messages.json()['messages']:
         message = requests.get("%s/message/%s" % (url, message_id), auth=HTTPBasicAuth(username, password)).json()
         CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
@@ -92,4 +91,8 @@ while True:
             else:
                 logging.error("uploading creature %s to %s FAILED" % (tmp['moniker'], tmp['aw_recipient']))
             agent.Kill()
-    time.sleep(1)
+    available_creatures = requests.get("%s/creatures" % url, auth=HTTPBasicAuth(username, password))
+    for creature in available_creatures.json()['creatures']:
+        logging.info("found creature %s" % creature['filename'])
+        # download creature and save it in my creatures folder
+    time.sleep(2)
