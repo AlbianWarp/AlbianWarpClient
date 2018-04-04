@@ -1,7 +1,7 @@
 import sys
 import clr
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 sys.path.append('.')
 clr.AddReference('CAOS')
 from CAOS import *

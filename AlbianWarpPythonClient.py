@@ -49,6 +49,9 @@ game_aw_status.Value = "online"
 print("running...")
 print(CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 mesg writ targ 500 next").Content)
 while True:
+    users = requests.get("%s/users" % url, auth=HTTPBasicAuth(username, password))
+    for user in users.json():
+        CI.ExecuteCaos('rtar 1 1 157 mesg wrt+ targ 1000 "%s" 0 0' % user )
     game_aw_online_indicator.Value = 1
     available_messages = requests.get("%s/messages" % url, auth=HTTPBasicAuth(username, password))
     for message_id in available_messages.json()['messages']:
@@ -94,5 +97,15 @@ while True:
     available_creatures = requests.get("%s/creatures" % url, auth=HTTPBasicAuth(username, password))
     for creature in available_creatures.json()['creatures']:
         logging.info("found creature %s" % creature['filename'])
+        result = requests.get("%s/creature/%s" % (url, creature['id']), auth=HTTPBasicAuth(username, password))
+        if result.status_code == 200:
+            with open(os.path.join(my_creatures_directory, creature['filename']), 'wb') as file:
+                file.write(result.content)
+        else:
+            raise Exception(len(result.content))
+        pass
+        result = requests.delete("%s/creature/%s" % (url, creature['id']), auth=HTTPBasicAuth(username, password))
+
+
         # download creature and save it in my creatures folder
-    time.sleep(2)
+    time.sleep(5)
