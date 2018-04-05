@@ -49,63 +49,64 @@ game_aw_status.Value = "online"
 print("running...")
 print(CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 mesg writ targ 500 next").Content)
 while True:
-    users = requests.get("%s/users" % url, auth=HTTPBasicAuth(username, password))
-    for user in users.json():
-        CI.ExecuteCaos('rtar 1 1 157 mesg wrt+ targ 1000 "%s" 0 0' % user )
-    game_aw_online_indicator.Value = 1
-    available_messages = requests.get("%s/messages" % url, auth=HTTPBasicAuth(username, password))
-    for message_id in available_messages.json()['messages']:
-        message = requests.get("%s/message/%s" % (url, message_id), auth=HTTPBasicAuth(username, password)).json()
-        CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
-        try:
-            if AgentBuilder(1, 1, 35754, message).inject().Success:
-                print("INJECTED incoming DMA: %s" % message)
-        except Exception as e:
-            logging.error(e)
-        finally:
-            if not requests.delete("%s/message/%s" % (url, message_id),
-                                   auth=HTTPBasicAuth(username, password)).status_code == 200:
-                logging.error("could not delete message %s" % message)
-        CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
-    # Parse direct message agents
-    for agent in enumAgents(1, 1, 35753):
-        print("DETECTED outgoing DMA: %s" % agent.unid)
-        CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
-        tmp = agent.dict
-        logging.info("Agent %s found: %s" % (agent.unid, tmp))
-        result = requests.post("%s/messages" % url, auth=HTTPBasicAuth(username, password), json=tmp)
-        if result.status_code == 200:
-            print("SENT DMA (%s): %s" % (agent.unid, tmp))
-            agent.Kill()
-        CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
-    # Parse send creature agents
-    for agent in enumAgents(1, 1, 35760):
-        tmp = agent.dict
-        logging.debug("Processing %s" % tmp)
-        logging.debug("DETECTED SCA: %s" % agent.unid)
-        creature_file = os.path.join(my_creatures_directory,"%s.ds.creature" % tmp['moniker'].replace('-','_'))
-        if os.path.isfile(creature_file):
-            logging.debug('Found creature to warp at "%s"' % creature_file)
-            files = {'file': open(creature_file, 'rb')}
-            values = {'recipient': tmp['aw_recipient'], 'creature_name': tmp['creature_name']}
-            result = requests.post("%s/creature_upload" % url, files=files, data=values, auth=HTTPBasicAuth(username, password))
-            if result.status_code == 200:
-                logging.info("uploaded creature %s to %s" % (tmp['moniker'], tmp['aw_recipient']))
-            else:
-                logging.error("uploading creature %s to %s FAILED" % (tmp['moniker'], tmp['aw_recipient']))
-            agent.Kill()
-    available_creatures = requests.get("%s/creatures" % url, auth=HTTPBasicAuth(username, password))
-    for creature in available_creatures.json()['creatures']:
-        logging.info("found creature %s" % creature['filename'])
-        result = requests.get("%s/creature/%s" % (url, creature['id']), auth=HTTPBasicAuth(username, password))
-        if result.status_code == 200:
-            with open(os.path.join(my_creatures_directory, creature['filename']), 'wb') as file:
-                file.write(result.content)
-        else:
-            raise Exception(len(result.content))
-        pass
-        result = requests.delete("%s/creature/%s" % (url, creature['id']), auth=HTTPBasicAuth(username, password))
-
-
-        # download creature and save it in my creatures folder
     time.sleep(5)
+    if CI.ExecuteCaos('outs wnam').Content.strip('\x00') != "Startup":
+        users = requests.get("%s/users" % url, auth=HTTPBasicAuth(username, password))
+        for user in users.json():
+            CI.ExecuteCaos('rtar 1 1 157 mesg wrt+ targ 1000 "%s" 0 0' % user )
+        game_aw_online_indicator.Value = 1
+        available_messages = requests.get("%s/messages" % url, auth=HTTPBasicAuth(username, password))
+        for message_id in available_messages.json()['messages']:
+            message = requests.get("%s/message/%s" % (url, message_id), auth=HTTPBasicAuth(username, password)).json()
+            CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
+            try:
+                if AgentBuilder(1, 1, 35754, message).inject().Success:
+                    print("INJECTED incoming DMA: %s" % message)
+            except Exception as e:
+                logging.error(e)
+            finally:
+                if not requests.delete("%s/message/%s" % (url, message_id),
+                                       auth=HTTPBasicAuth(username, password)).status_code == 200:
+                    logging.error("could not delete message %s" % message)
+            CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
+        # Parse direct message agents
+        for agent in enumAgents(1, 1, 35753):
+            print("DETECTED outgoing DMA: %s" % agent.unid)
+            CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
+            tmp = agent.dict
+            logging.info("Agent %s found: %s" % (agent.unid, tmp))
+            result = requests.post("%s/messages" % url, auth=HTTPBasicAuth(username, password), json=tmp)
+            if result.status_code == 200:
+                print("SENT DMA (%s): %s" % (agent.unid, tmp))
+                agent.Kill()
+            CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
+        # Parse send creature agents
+        for agent in enumAgents(1, 1, 35760):
+            tmp = agent.dict
+            logging.debug("Processing %s" % tmp)
+            logging.debug("DETECTED SCA: %s" % agent.unid)
+            creature_file = os.path.join(my_creatures_directory,"%s.ds.creature" % tmp['moniker'].replace('-','_'))
+            if os.path.isfile(creature_file):
+                logging.debug('Found creature to warp at "%s"' % creature_file)
+                files = {'file': open(creature_file, 'rb')}
+                values = {'recipient': tmp['aw_recipient'], 'creature_name': tmp['creature_name']}
+                result = requests.post("%s/creature_upload" % url, files=files, data=values, auth=HTTPBasicAuth(username, password))
+                if result.status_code == 200:
+                    logging.info("uploaded creature %s to %s" % (tmp['moniker'], tmp['aw_recipient']))
+                else:
+                    logging.error("uploading creature %s to %s FAILED" % (tmp['moniker'], tmp['aw_recipient']))
+                agent.Kill()
+        available_creatures = requests.get("%s/creatures" % url, auth=HTTPBasicAuth(username, password))
+        for creature in available_creatures.json()['creatures']:
+            logging.info("found creature %s" % creature['filename'])
+            result = requests.get("%s/creature/%s" % (url, creature['id']), auth=HTTPBasicAuth(username, password))
+            if result.status_code == 200:
+                with open(os.path.join(my_creatures_directory, creature['filename']), 'wb') as file:
+                    file.write(result.content)
+            else:
+                raise Exception(len(result.content))
+            pass
+            result = requests.delete("%s/creature/%s" % (url, creature['id']), auth=HTTPBasicAuth(username, password))
+
+
+            # download creature and save it in my creatures folder
