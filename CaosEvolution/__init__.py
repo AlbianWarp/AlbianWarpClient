@@ -19,4 +19,22 @@ class LoggingCaosInjector(CaosInjector):
         logging.debug(result.Content)
         return result
 
+
 CI = LoggingCaosInjector('Docking Station')
+
+
+@property
+def WorldName():
+    return CI.ExecuteCaos('outs wnam').Content.strip('\x00')
+
+
+def add_user_to_contact_list(username):
+    CI.ExecuteCaos('rtar 1 1 157 mesg wrt+ targ 1000 "%s" 0 0' % username)
+
+
+def _ds_gui_online():
+    CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 mesg writ targ 500 next")
+
+
+def _ds_gui_offline():
+    CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 mesg writ targ 501 next")
