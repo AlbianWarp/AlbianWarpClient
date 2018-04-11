@@ -8,7 +8,6 @@ import os
 import configparser
 import asyncio
 
-
 def config():
     config = configparser.ConfigParser()
     config['DEFAULT'] = {
@@ -22,6 +21,7 @@ def config():
 
 
 cfg = config()
+auth_token = None
 
 
 def main():
@@ -71,13 +71,16 @@ def initial_checks():
 
 
 def verify_login_credentials():
-    auth_test = requests.get("%s/messages" % cfg['url'], auth=HTTPBasicAuth(cfg['username'], cfg['password']))
+    global auth_token
+    auth_test = requests.get("%s/login" % cfg['url'], auth=HTTPBasicAuth(cfg['username'], cfg['password']))
     while auth_test.status_code != 200:
         cfg['username'] = input('Please enter your username: ')
         cfg['password'] = input('Please enter your password: ')
-        auth_test = requests.get("%s/messages" % cfg['url'], auth=HTTPBasicAuth(cfg['username'], cfg['password']))
+        auth_test = requests.get("%s/login" % cfg['url'], auth=HTTPBasicAuth(cfg['username'], cfg['password']))
         if auth_test.status_code != 200:
             print('Wrong username or password, please try again!')
+    auth_token = auth_test.json()['token']
+    print(auth_token)
 
 
 async def send_creatures():
@@ -96,7 +99,7 @@ async def send_creatures():
                     files = {'file': open(creature_file, 'rb')}
                     values = {'recipient': tmp['aw_recipient'], 'creature_name': tmp['creature_name']}
                     result = requests.post("%s/creature_upload" % cfg['url'], files=files, data=values,
-                                           auth=HTTPBasicAuth(cfg['username'], cfg['password']))
+                                           headers={'token': auth_token})
                     if result.status_code == 200:
                         logging.info("uploaded creature %s to %s" % (tmp['moniker'], tmp['aw_recipient']))
                     else:
@@ -110,18 +113,18 @@ async def receive_creatures():
     while True:
         if WorldName != "Startup":
             available_creatures = requests.get("%s/creatures" % cfg['url'],
-                                               auth=HTTPBasicAuth(cfg['username'], cfg['password']))
+                                               headers={'token': auth_token})
             for creature in available_creatures.json()['creatures']:
                 logging.info("found creature %s" % creature['filename'])
                 result = requests.get("%s/creature/%s" % (cfg['url'], creature['id']),
-                                      auth=HTTPBasicAuth(cfg['username'], cfg['password']))
+                                      headers={'token': auth_token})
                 if result.status_code == 200:
                     with open(os.path.join(cfg['my_creatures_directory'], creature['filename']), 'wb') as file:
                         file.write(result.content)
                 else:
                     raise Exception(len(result.content))
                 requests.delete("%s/creature/%s" % (cfg['url'], creature['id']),
-                                auth=HTTPBasicAuth(cfg['username'], cfg['password']))
+                                headers={'token': auth_token})
         await asyncio.sleep(50)
 
 
@@ -135,7 +138,7 @@ async def send_direct_message_agents():
                 logging.info("DETECTED outgoing DMA: %s" % agent.unid)
                 logging.debug("Processing %s" % tmp)
                 result = requests.post("%s/messages" % cfg['url'],
-                                       auth=HTTPBasicAuth(cfg['username'], cfg['password']),
+                                       headers={'token': auth_token},
                                        json=tmp)
                 if result.status_code == 200:
                     logging.info("SENT DMA (%s)" % (agent.unid))
@@ -148,10 +151,10 @@ async def receive_direct_message_agents():
     while True:
         if WorldName != "Startup":
             available_messages = requests.get("%s/messages" % cfg['url'],
-                                              auth=HTTPBasicAuth(cfg['username'], cfg['password']))
+                                              headers={'token': auth_token})
             for message_id in available_messages.json()['messages']:
                 message = requests.get("%s/message/%s" % (cfg['url'], message_id),
-                                       auth=HTTPBasicAuth(cfg['username'], cfg['password'])).json()
+                                       headers={'token': auth_token}).json()
                 CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
                 try:
                     if AgentBuilder(1, 1, 35754, message).inject().Success:
@@ -160,7 +163,7 @@ async def receive_direct_message_agents():
                     logging.error(e)
                 finally:
                     if not requests.delete("%s/message/%s" % (cfg['url'], message_id),
-                                           auth=HTTPBasicAuth(cfg['username'], cfg['password'])).status_code == 200:
+                                           headers={'token': auth_token}).status_code == 200:
                         logging.error("could not delete message %s" % message)
                 CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
         await asyncio.sleep(10)
@@ -170,7 +173,7 @@ async def updateContactList():
     while True:
         game_aw_online_indicator.Value = 1
         if WorldName != "Startup":
-            users = requests.get("%s/users" % cfg['url'], auth=HTTPBasicAuth(cfg['username'], cfg['password']))
+            users = requests.get("%s/users" % cfg['url'], headers={'token': auth_token})
             for user in users.json():
                 add_user_to_contact_list(user)
         await asyncio.sleep(60)
