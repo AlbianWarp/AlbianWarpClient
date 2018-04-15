@@ -98,7 +98,7 @@ def main():
 
 
 def initial_checks():
-    server_version = "alpha alpaca"
+    server_version = "alpha andromeda"
     bootstrap_version = "alpha alpaca"
     print('"My Creatures" directory: "%s"' % cfg['my_creatures_directory'])
     print("Checking Bootstrap version...")
