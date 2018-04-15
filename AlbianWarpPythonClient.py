@@ -17,7 +17,7 @@ def read_config():
         'username': '',
         'password': '',
         'url': 'https://alpha.albianwarp.com',
-        'port': 5000,
+        'port': 443,
         'my_creatures_directory': r"C:\Users\%s\Documents\Creatures\Docking Station\My Creatures" % os.getlogin()
     }
     config.read('albianwarp.cfg')
