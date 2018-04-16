@@ -1,28 +1,21 @@
 import sys
 import clr
 import logging
-logging.basicConfig(level=logging.INFO)
 sys.path.append('.')
 clr.AddReference('CAOS')
 from CAOS import *
 from threading import Lock
-
-
 
 class LoggingCaosInjector(CaosInjector):
 
     lock = Lock()
 
     def __init__(self, game_name):
-        logging.info('initializing CaosInjector')
         super().__init__(game_name)
 
     def ExecuteCaos(self, caos, action="execute"):
         self.lock.acquire()
-        logging.debug('ExecuteCaos action: %s' % action)
-        logging.debug(caos)
         result = super().ExecuteCaos(caos, action=action)
-        logging.debug(result.Content)
         self.lock.release()
         return result
 
