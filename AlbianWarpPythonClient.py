@@ -13,6 +13,8 @@ import time
 
 logger = logging.getLogger('AW')
 logger.setLevel("INFO")
+# TODO: logger does not work reliable with the current multithreading approach, investigate and replace all the
+# TODO: ugly print('') Statements with logger.info, logger.debug and so on...
 
 def read_config():
     config = configparser.ConfigParser()
