@@ -1,6 +1,7 @@
 from CaosEvolution import CI
 import logging
 import json
+import re
 
 
 class AgentBuilder:
@@ -13,13 +14,14 @@ class AgentBuilder:
         self.caos = ""
 
     def inject(self):
-        self.caos += 'new: simp %s %s %s "blnk" 1 0 0\n' % (self.family,self.genus,self.species)
+        self.caos += 'new: simp %s %s %s "blnk" 1 0 0\n' % (self.family, self.genus, self.species)
         for key, value in self.data.items():
-            if type(value) in [float,int]:
+            if type(value) in [float, int]:
                 self.caos += 'setv name "%s" %s\n' % (key, value)
             if type(value) == str:
                 self.caos += 'sets name "%s" "%s"\n' % (key, value.replace('\n', r'\n'))
         return CI.ExecuteCaos(self.caos)
+
 
 def enumAgents(family, genus, species):
     tmp = list()
@@ -84,10 +86,14 @@ class Agent:
 
     @property
     def _json(self):
-        return CI.ExecuteCaos(
+        unclean_json = CI.ExecuteCaos(
             r'targ agnt %s sets va00 "" outs "{" loop namn va00  doif va00 ne "" outs "\"" outs va00 outs "\": " setv va10 type name va00 doif va10 eq 2 outx name va00  elif va10 lt 2 outv name va00 endi outs "," endi untl va00 eq "" outs "}"' % self.unid).Content.strip(
-            '\x00').replace(',}', '}')
+            '\x00')
+        unclean_json = re.sub(",}$", "}", unclean_json)
+        unclean_json = unclean_json.replace("\\'", "'")
+        return unclean_json
 
     @property
     def dict(self):
+        print(self._json)
         return json.loads(self._json)
