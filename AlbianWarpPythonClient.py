@@ -115,6 +115,10 @@ def main():
     rtdma_send_handler_thread.daemon = True
     rtdma_send_handler_thread.start()
     while run:
+        dbg_out = CI.ExecuteCaos("DBG: POLL").Content.strip('\x00')
+        if dbg_out != "":
+            print("DBG: OUTS:")
+            print(dbg_out)
         time.sleep(1)
 
 
