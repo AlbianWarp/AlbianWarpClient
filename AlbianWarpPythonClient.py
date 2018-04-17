@@ -1,6 +1,6 @@
 from CaosEvolution.GameVariables import *
 from CaosEvolution.Agent import AgentBuilder, enumAgents
-from CaosEvolution import CI, WorldName, add_user_to_contact_list
+from CaosEvolution import CI, WorldName, add_user_to_contact_list, delete_creature_by_moniker
 from decorators import retry
 import requests
 from requests.auth import HTTPBasicAuth
