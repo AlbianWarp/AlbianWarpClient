@@ -161,18 +161,34 @@ def send_creature(agent):
     tmp = agent.dict
     print("DETECTED SCA: %s" % agent.unid)
     print("DEBUG: Processing  %s" % tmp)
-    creature_file = os.path.join(cfg['my_creatures_directory'],
-                                 "%s.ds.creature" % tmp['moniker'].replace('-', '_'))
+    if tmp['creature_name'] != "":
+        creature_file = os.path.join(
+            cfg['my_creatures_directory'],
+            "%s_%s.ds.creature" % (tmp['creature_name'], tmp['moniker'].replace('-', '_'))
+        )
+    else:
+        creature_file = os.path.join(
+            cfg['my_creatures_directory'],
+            "%s.ds.creature" % tmp['moniker'].replace('-', '_')
+        )
     if os.path.isfile(creature_file):
         print('DEBUG: Found creature to warp at "%s"' % creature_file)
-        files = {'file': open(creature_file, 'rb')}
-        values = {'recipient': tmp['aw_recipient'], 'creature_name': tmp['creature_name']}
-        result = requests.post("%s/creature_upload" % cfg['url'], files=files, data=values,
-                               headers={'token': auth_token})
+        with open(creature_file, 'rb') as f:
+            files = {'file': f}
+            values = {'recipient': tmp['aw_recipient'], 'creature_name': tmp['creature_name']}
+            result = requests.post("%s/creature_upload" % cfg['url'], files=files, data=values,
+                                   headers={'token': auth_token})
         if result.status_code == 200:
             print("uploaded creature %s to %s" % (tmp['moniker'], tmp['aw_recipient']))
+            time.sleep(5)
+            print(delete_creature_by_moniker(tmp['moniker']))
+            if not os.path.isfile(creature_file):
+                print('Deleted creature file "%s" after succesfull upload' % creature_file)
+            else:
+                print('COULD NOT delete creature file "%s" after succesfull upload, probably already deleted!' % creature_file)
         else:
-            print("ERROR: uploading creature %s to %s FAILED! Status Code: %s" % (tmp['moniker'], tmp['aw_recipient'], result.status_code))
+            print("ERROR: uploading creature %s to %s FAILED! Status Code: %s" % (
+            tmp['moniker'], tmp['aw_recipient'], result.status_code))
     else:
         print("ERROR: Could not find %s" % creature_file)
     agent.Kill()
