@@ -13,6 +13,8 @@ import time
 
 logger = logging.getLogger('AW')
 logger.setLevel("INFO")
+
+
 # TODO: logger does not work reliable with the current multithreading approach, investigate and replace all the
 # TODO: ugly print('') Statements with logger.info, logger.debug and so on...
 
@@ -35,11 +37,13 @@ socketio_sid = None
 auth_token = None
 run = True
 
+
 def sleep_while_run(seconds):
     for second in range(seconds):
         if not run:
             break
         time.sleep(1)
+
 
 class AwNamespace(BaseNamespace):
 
@@ -132,7 +136,7 @@ def initial_checks():
         exit(1)
     elif eame_aw_mod_version != bootstrap_version:
         print('ERROR: Wrong modification version found! Expected "%s" found "%s" instead' % (
-                bootstrap_version, eame_aw_mod_version))
+            bootstrap_version, eame_aw_mod_version))
         exit(1)
 
     print("Checking server version...")
@@ -343,6 +347,7 @@ def rtdma_send_handler():
         sleep_while_run(2)
     print("DEBUG: rtdma_send_handler thread ended")
 
+
 @retry(Exception)
 def update_contact_list():
     users = requests.get("%s/users" % cfg['url'], headers={'token': auth_token})
@@ -364,6 +369,7 @@ def contactlist_handler():
             raise e
         sleep_while_run(5)
     print("DEBUG: contactlist_handler thread ended")
+
 
 if __name__ == '__main__':
     main()
