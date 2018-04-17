@@ -224,6 +224,7 @@ def creature_download_handler():
         except Exception as e:
             print("ERROR: %s" % e)
             run = False
+            raise e
         sleep_while_run(50)
     print("DEBUG: creature_download_handler thread ended")
 
@@ -242,6 +243,7 @@ def creature_upload_handler():
         except Exception as e:
             print("ERROR: %s" % e)
             run = False
+            raise e
         sleep_while_run(8)
     print("DEBUG: creature_upload_handler thread ended")
 
@@ -273,6 +275,7 @@ def dma_send_handler():
         except Exception as e:
             print("ERROR: %s" % e)
             run = False
+            raise e
         sleep_while_run(5)
     print("DEBUG: dma_send_handler thread ended")
 
@@ -307,10 +310,12 @@ def dma_receive_handler():
             except Exception as e:
                 print(e)
                 run = False
+                raise e
         sleep_while_run(9)
     print("DEBUG: dma_receive_handler thread ended")
 
-retry(Exception)
+
+@retry(Exception)
 def send_rtdma(agent):
     tmp = agent.dict
     print("DETECTED outgoing RTDMA: %s" % agent.unid)
@@ -334,6 +339,7 @@ def rtdma_send_handler():
         except Exception as e:
             print("ERROR: %s" % e)
             run = False
+            raise e
         sleep_while_run(2)
     print("DEBUG: rtdma_send_handler thread ended")
 
@@ -355,6 +361,7 @@ def contactlist_handler():
         except Exception as e:
             print("ERROR: %s" % e)
             run = False
+            raise e
         sleep_while_run(5)
     print("DEBUG: contactlist_handler thread ended")
 
