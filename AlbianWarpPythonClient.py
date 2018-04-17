@@ -1,6 +1,6 @@
 from CaosEvolution.GameVariables import *
 from CaosEvolution.Agent import AgentBuilder, enumAgents
-from CaosEvolution import CI, WorldName, add_user_to_contact_list
+from CaosEvolution import CI, WorldName, add_user_to_contact_list, delete_creature_by_moniker
 from decorators import retry
 import requests
 from requests.auth import HTTPBasicAuth
@@ -13,6 +13,8 @@ import time
 
 logger = logging.getLogger('AW')
 logger.setLevel("INFO")
+
+
 # TODO: logger does not work reliable with the current multithreading approach, investigate and replace all the
 # TODO: ugly print('') Statements with logger.info, logger.debug and so on...
 
@@ -35,11 +37,13 @@ socketio_sid = None
 auth_token = None
 run = True
 
+
 def sleep_while_run(seconds):
     for second in range(seconds):
         if not run:
             break
         time.sleep(1)
+
 
 class AwNamespace(BaseNamespace):
 
@@ -115,6 +119,10 @@ def main():
     rtdma_send_handler_thread.daemon = True
     rtdma_send_handler_thread.start()
     while run:
+        dbg_out = CI.ExecuteCaos("DBG: POLL").Content.strip('\x00')
+        if dbg_out != "":
+            print("DBG: OUTS:")
+            print(dbg_out)
         time.sleep(1)
 
 
@@ -128,7 +136,7 @@ def initial_checks():
         exit(1)
     elif eame_aw_mod_version != bootstrap_version:
         print('ERROR: Wrong modification version found! Expected "%s" found "%s" instead' % (
-                bootstrap_version, eame_aw_mod_version))
+            bootstrap_version, eame_aw_mod_version))
         exit(1)
 
     print("Checking server version...")
@@ -157,18 +165,34 @@ def send_creature(agent):
     tmp = agent.dict
     print("DETECTED SCA: %s" % agent.unid)
     print("DEBUG: Processing  %s" % tmp)
-    creature_file = os.path.join(cfg['my_creatures_directory'],
-                                 "%s.ds.creature" % tmp['moniker'].replace('-', '_'))
+    if tmp['creature_name'] != "":
+        creature_file = os.path.join(
+            cfg['my_creatures_directory'],
+            "%s_%s.ds.creature" % (tmp['creature_name'], tmp['moniker'].replace('-', '_'))
+        )
+    else:
+        creature_file = os.path.join(
+            cfg['my_creatures_directory'],
+            "%s.ds.creature" % tmp['moniker'].replace('-', '_')
+        )
     if os.path.isfile(creature_file):
         print('DEBUG: Found creature to warp at "%s"' % creature_file)
-        files = {'file': open(creature_file, 'rb')}
-        values = {'recipient': tmp['aw_recipient'], 'creature_name': tmp['creature_name']}
-        result = requests.post("%s/creature_upload" % cfg['url'], files=files, data=values,
-                               headers={'token': auth_token})
+        with open(creature_file, 'rb') as f:
+            files = {'file': f}
+            values = {'recipient': tmp['aw_recipient'], 'creature_name': tmp['creature_name']}
+            result = requests.post("%s/creature_upload" % cfg['url'], files=files, data=values,
+                                   headers={'token': auth_token})
         if result.status_code == 200:
             print("uploaded creature %s to %s" % (tmp['moniker'], tmp['aw_recipient']))
+            time.sleep(5)
+            print(delete_creature_by_moniker(tmp['moniker']))
+            if not os.path.isfile(creature_file):
+                print('Deleted creature file "%s" after succesfull upload' % creature_file)
+            else:
+                print('COULD NOT delete creature file "%s" after succesfull upload, probably already deleted!' % creature_file)
         else:
-            print("ERROR: uploading creature %s to %s FAILED! Status Code: %s" % (tmp['moniker'], tmp['aw_recipient'], result.status_code))
+            print("ERROR: uploading creature %s to %s FAILED! Status Code: %s" % (
+            tmp['moniker'], tmp['aw_recipient'], result.status_code))
     else:
         print("ERROR: Could not find %s" % creature_file)
     agent.Kill()
@@ -204,6 +228,7 @@ def creature_download_handler():
         except Exception as e:
             print("ERROR: %s" % e)
             run = False
+            raise e
         sleep_while_run(50)
     print("DEBUG: creature_download_handler thread ended")
 
@@ -222,6 +247,7 @@ def creature_upload_handler():
         except Exception as e:
             print("ERROR: %s" % e)
             run = False
+            raise e
         sleep_while_run(8)
     print("DEBUG: creature_upload_handler thread ended")
 
@@ -253,6 +279,7 @@ def dma_send_handler():
         except Exception as e:
             print("ERROR: %s" % e)
             run = False
+            raise e
         sleep_while_run(5)
     print("DEBUG: dma_send_handler thread ended")
 
@@ -287,10 +314,12 @@ def dma_receive_handler():
             except Exception as e:
                 print(e)
                 run = False
+                raise e
         sleep_while_run(9)
     print("DEBUG: dma_receive_handler thread ended")
 
-retry(Exception)
+
+@retry(Exception)
 def send_rtdma(agent):
     tmp = agent.dict
     print("DETECTED outgoing RTDMA: %s" % agent.unid)
@@ -314,8 +343,10 @@ def rtdma_send_handler():
         except Exception as e:
             print("ERROR: %s" % e)
             run = False
+            raise e
         sleep_while_run(2)
     print("DEBUG: rtdma_send_handler thread ended")
+
 
 @retry(Exception)
 def update_contact_list():
@@ -335,8 +366,10 @@ def contactlist_handler():
         except Exception as e:
             print("ERROR: %s" % e)
             run = False
+            raise e
         sleep_while_run(5)
     print("DEBUG: contactlist_handler thread ended")
+
 
 if __name__ == '__main__':
     main()
