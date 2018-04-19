@@ -66,7 +66,7 @@ class AwNamespace(BaseNamespace):
     def on_rtdma(self, data):
         print("recieved a RTDMA")
         try:
-            if AgentBuilder(1, 1, 35754, data).inject().Success:
+            if AgentBuilder(1, 1, 35756, data).inject().Success:
                 print("DEBUG: INJECTED incoming RTDMA: %s" % data)
         except Exception as e:
             print("ERROR: %s" % e)
@@ -200,7 +200,7 @@ def send_creature(agent):
 
 @retry(Exception)
 def download_creatures():
-    print("DEBUG: requesting available creatures")
+    #print("DEBUG: requesting available creatures")
     available_creatures = requests.get("%s/creatures" % cfg['url'],
                                        headers={'token': auth_token})
     if available_creatures.status_code == 200:
@@ -286,7 +286,7 @@ def dma_send_handler():
 
 @retry(Exception)
 def receive_dmas():
-    print("DEBUG: requesting available DMA's")
+    #print("DEBUG: requesting available DMA's")
     available_messages = requests.get("%s/messages" % cfg['url'], headers={'token': auth_token})
     if available_messages.status_code == 200:
         for message_id in available_messages.json()['messages']:
