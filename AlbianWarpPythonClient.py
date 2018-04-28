@@ -29,8 +29,8 @@ def read_config():
     config['DEFAULT'] = {
         'username': '',
         'password': '',
-        'websocket_url': 'wss://alpha.albianwarp.com/ws',
-        'url': 'https://alpha.albianwarp.com',
+        'websocket_url': 'wss://gameserver.albianwarp.com/ws',
+        'url': 'https://gameserver.albianwarp.com',
         'my_creatures_directory': r"C:\Users\%s\Documents\Creatures\Docking Station\My Creatures" % os.getlogin()
     }
     config.read('albianwarp.cfg')
