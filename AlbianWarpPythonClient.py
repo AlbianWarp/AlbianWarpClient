@@ -144,6 +144,10 @@ def main():
     contactlist_handler_thread = threading.Thread(target=contactlist_handler)
     contactlist_handler_thread.daemon = True
     contactlist_handler_thread.start()
+    # rtdma send Handler
+    rtdma_send_handler_thread = threading.Thread(target=rtdma_send_handler)
+    rtdma_send_handler_thread.daemon = True
+    rtdma_send_handler_thread.start()
     while run:
         dbg_out = CI.ExecuteCaos("DBG: POLL").Content.strip('\x00')
         if dbg_out != "":
@@ -290,7 +294,9 @@ def send_dma(agent):
                     json=tmp)
     if result.status_code == 200:
         print("SENT DMA (%s)" % agent.unid)
-        agent.Kill()
+    else:
+        print("Could not send DMA, Status Code: %s" % result.status_code)
+    agent.Kill()
 
 
 def dma_send_handler():
