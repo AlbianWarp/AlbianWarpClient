@@ -154,6 +154,7 @@ def main():
             print("DBG: OUTS:")
             print(dbg_out)
         time.sleep(1)
+    input("Press Enter to continue...")
 
 
 def initial_checks():
