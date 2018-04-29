@@ -270,8 +270,9 @@ def creature_upload_handler():
     print("DEBUG: creature_upload_handler thread started")
     while run:
         try:
-            game_aw_online_indicator.Value = 1
             if WorldName != "Startup":
+                game_aw_online_indicator.Value = 1
+                game_user_of_this_world.Value = cfg['username']
                 for agent in enumAgents(1, 1, 35760):
                     CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
                     send_creature(agent)
@@ -304,8 +305,9 @@ def dma_send_handler():
     print("DEBUG: dma_send_hanlder thread started")
     while run:
         try:
-            game_aw_online_indicator.Value = 1
             if WorldName != "Startup":
+                game_aw_online_indicator.Value = 1
+                game_user_of_this_world.Value = cfg['username']
                 for agent in enumAgents(1, 1, 35753):
                     CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
                     send_dma(agent)
@@ -343,6 +345,8 @@ def dma_receive_handler():
     print("DEBUG: dma_receive_handler thread started")
     while run:
         if WorldName != "Startup":
+            game_aw_online_indicator.Value = 1
+            game_user_of_this_world.Value = cfg['username']
             try:
                 receive_dmas()
             except Exception as e:
@@ -391,8 +395,9 @@ def rtdma_send_handler():
     print("DEBUG: rtdma_send_handler thread started")
     while run:
         try:
-            game_aw_online_indicator.Value = 1
             if WorldName != "Startup":
+                game_aw_online_indicator.Value = 1
+                game_user_of_this_world.Value = cfg['username']
                 for agent in enumAgents(1, 1, 35755):
                     CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
                     send_rtdma(agent)
