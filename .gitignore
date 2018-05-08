@@ -1,4 +1,7 @@
-vanv/
+venv/
 .idea/
 __pycache__/
 albianwarp.cfg
+build/
+AlbianWarpPythonClient.exe
+AlbianWarpPythonClient.spec
