@@ -80,13 +80,13 @@ def consumer(message, websocket):
 
 class AwSocketClient(WebSocketClient):
 
+
     def opened(self):
         self.send(json.dumps({"auth": auth_token}))
+        print("Opened WebSocket")
 
     def closed(self, code, reason=None):
-        global run
-        print("Closed down Socket", code, reason)
-        run = False
+        print("Closed WebSocket", code, reason)
 
     def received_message(self, m):
         consumer(m, self)
@@ -97,19 +97,20 @@ class AwSocketClient(WebSocketClient):
 def socket_handler():
     print("DEBUG: socket_handler thread started")
     global run
-    try:
-        ws.connect()
-        while run:
+    global ws
+    while run:
+        try:
+            ws = AwSocketClient(cfg['websocket_url'])
+            ws.connect()
             ws.run_forever()
+        except Exception as e:
             run = False
-    except Exception as e:
-        run = False
-        raise e
+            raise e
+    run = False
     print("DEBUG: socket_handler thread ended")
 
 
 def main():
-    global ws
     global s
     initial_checks()
     verify_login_credentials()
@@ -120,7 +121,6 @@ def main():
     game_aw_status.Value = "online"
     print("running...")
     print(CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 mesg writ targ 500 next").Content)
-    ws = AwSocketClient(cfg['websocket_url'])
     socket_handler_thread = threading.Thread(target=socket_handler)
     socket_handler_thread.daemon = True
     socket_handler_thread.start()
@@ -154,7 +154,8 @@ def main():
             print("DBG: OUTS:")
             print(dbg_out)
         time.sleep(1)
-    input("Press Enter to continue...")
+    time.sleep(2)
+    input("Press Enter to Exit...")
 
 
 def initial_checks():
