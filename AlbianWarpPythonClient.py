@@ -35,7 +35,8 @@ def read_config():
         'url': 'https://gameserver.albianwarp.com',
         'my_creatures_directory': r'C:\Users\%s\Documents\Creatures\Docking Station\My Creatures' % os.getlogin(),
         'ds_directory': r'C:\GOG Games\Creatures Exodus\Docking Station',
-        'github_game_modification_update_url': r'https://api.github.com/repos/AlbianWarp/AlbianWarpGameModifications/releases/latest'
+        'github_game_modification_update_url': r'https://api.github.com/repos/AlbianWarp/AlbianWarpGameModifications/releases/latest',
+        'bootstrap_auto_update': "true"
     }
     config.read('albianwarp.cfg')
     return config['albianwarp']
@@ -120,6 +121,8 @@ def get_latest_game_modifications():
     global cfg
     global latest_release
     latest_release = s.get(cfg['github_game_modification_update_url']).json()
+    if cfg['bootstrap_auto_update'].lower() != "true":
+        return
     print('Latest available GameModification Version is "%s"' % latest_release['tag_name'])
     bootstrap_download_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "bootstrap_downloads")
     if not os.path.exists(bootstrap_download_dir):
