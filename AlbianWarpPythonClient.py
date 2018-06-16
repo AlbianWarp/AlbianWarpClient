@@ -1,4 +1,5 @@
 import os
+from distutils.dir_util import copy_tree
 import ssl
 import time
 import json
@@ -6,6 +7,7 @@ import logging
 import requests
 import threading
 import configparser
+import zipfile
 
 from urllib3 import PoolManager
 from requests.adapters import HTTPAdapter
@@ -31,7 +33,9 @@ def read_config():
         'password': '',
         'websocket_url': 'wss://gameserver.albianwarp.com/ws',
         'url': 'https://gameserver.albianwarp.com',
-        'my_creatures_directory': r"C:\Users\%s\Documents\Creatures\Docking Station\My Creatures" % os.getlogin()
+        'my_creatures_directory': r'C:\Users\%s\Documents\Creatures\Docking Station\My Creatures' % os.getlogin(),
+        'ds_directory': r'C:\GOG Games\Creatures Exodus\Docking Station',
+        'github_game_modification_update_url': r'https://api.github.com/repos/AlbianWarp/AlbianWarpGameModifications/releases/latest'
     }
     config.read('albianwarp.cfg')
     return config['albianwarp']
@@ -52,6 +56,7 @@ cfg = read_config()
 ws = None
 auth_token = None
 run = True
+latest_release = {}
 
 
 def sleep_while_run(seconds):
@@ -110,8 +115,37 @@ def socket_handler():
     print("DEBUG: socket_handler thread ended")
 
 
+def get_latest_game_modifications():
+    global s
+    global cfg
+    global latest_release
+    latest_release = s.get(cfg['github_game_modification_update_url']).json()
+    print('Latest available GameModification Version is "%s"' % latest_release['tag_name'])
+    bootstrap_download_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "bootstrap_downloads")
+    if not os.path.exists(bootstrap_download_dir):
+        os.makedirs(bootstrap_download_dir)
+    if not os.path.isfile(os.path.join(bootstrap_download_dir, '%s.zip' % latest_release['tag_name'])):
+        print('downloading AlbianWarpGameModifications Version "%s"' % latest_release['tag_name'])
+        r = requests.get(latest_release['zipball_url'], stream=True)
+        with open(os.path.join(bootstrap_download_dir, '%s.zip' % latest_release['tag_name']), 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk:  # filter out keep-alive new chunks
+                    f.write(chunk)
+    else:
+        print('AlbianWarpGameModifications version "%s" already downloaded' % latest_release['tag_name'])
+    if not os.path.exists(os.path.join(bootstrap_download_dir, latest_release['tag_name'])):
+        with zipfile.ZipFile(os.path.join(bootstrap_download_dir, '%s.zip' % latest_release['tag_name']), 'r') as z:
+            print('Extracting Bootstrap from Zipfile "%s.zip"' % latest_release['tag_name'])
+            files_to_extract = [file for file in z.namelist() if file.startswith('%sBootstrap/' % z.namelist()[0])]
+            z.extractall(os.path.join(bootstrap_download_dir, latest_release['tag_name']), members=files_to_extract)
+            print('Copying/installing files for Version "%s"!' % latest_release['tag_name'])
+            copy_tree(os.path.join(bootstrap_download_dir, latest_release['tag_name'], z.namelist()[0], 'Bootstrap/'), os.path.join(cfg['ds_directory'], 'Bootstrap/'))
+            print('Bootstrap was just updated, please ensure the modifications in your world are active.')
+            print('Create a new World :)')
+
 def main():
     global s
+    get_latest_game_modifications()
     initial_checks()
     verify_login_credentials()
     print("going online...")
@@ -160,15 +194,14 @@ def main():
 
 def initial_checks():
     server_version = "beta baboon"
-    bootstrap_version = "alpha alpaca"
     print('My Creatures directory: "%s"' % cfg['my_creatures_directory'])
     print("DEBUG: Checking Bootstrap version...")
     if eame_aw_mod_version == "":
         print("ERROR: Game modifications are not Installed! :(")
         exit(1)
-    elif eame_aw_mod_version != bootstrap_version:
+    elif eame_aw_mod_version not in [latest_release['tag_name'],'dev','alpha alpaca']:
         print('ERROR: Wrong modification version found! Expected "%s" found "%s" instead' % (
-            bootstrap_version, eame_aw_mod_version))
+            latest_release['tag_name'], eame_aw_mod_version))
         exit(1)
 
     print("Checking server version...")
@@ -215,18 +248,17 @@ def send_creature(agent):
             values = {'recipient': tmp['aw_recipient'], 'creature_name': tmp['creature_name']}
             result = s.post("%s/creature" % cfg['url'], files=files, data=values,
                             headers={'token': auth_token})
-        if result.status_code == 200:
-            print("uploaded creature %s to %s" % (tmp['moniker'], tmp['aw_recipient']))
-            time.sleep(5)
-            print(delete_creature_by_moniker(tmp['moniker']))
-            if not os.path.isfile(creature_file):
-                print('Deleted creature file "%s" after succesfull upload' % creature_file)
-            else:
-                print(
-                    'COULD NOT delete creature file "%s" after successful upload!' % creature_file)
+        if result.status_code != 200:
+            print("ERROR: uploading creature %s to %s FAILED! Status Code: %s" % (tmp['moniker'], tmp['aw_recipient'], result.status_code))
         else:
-            print("ERROR: uploading creature %s to %s FAILED! Status Code: %s" % (
-                tmp['moniker'], tmp['aw_recipient'], result.status_code))
+            print("uploaded creature %s to %s" % (tmp['moniker'], tmp['aw_recipient']))
+        print(delete_creature_by_moniker(tmp['moniker']))
+        time.sleep(1)
+        if not os.path.isfile(creature_file):
+            print('Deleted creature file "%s" after succesfull upload' % creature_file)
+        else:
+            print(
+                'COULD NOT delete creature file "%s" after successful upload!' % creature_file)
     else:
         print("ERROR: Could not find %s" % creature_file)
     agent.Kill()
@@ -283,7 +315,7 @@ def creature_upload_handler():
             print("ERROR: %s" % e)
             run = False
             raise e
-        sleep_while_run(8)
+        sleep_while_run(5)
     print("DEBUG: creature_upload_handler thread ended")
 
 
@@ -355,7 +387,7 @@ def dma_receive_handler():
                 print(e)
                 run = False
                 raise e
-        sleep_while_run(9)
+        sleep_while_run(10)
     print("DEBUG: dma_receive_handler thread ended")
 
 
@@ -366,6 +398,8 @@ def update_contact_list():
         # print("DEBUG: %s is %s " % (user, status))
         add_user_to_contact_list(user)
         CI.ExecuteCaos('sets game "%s_status" "%s"' % (user, status))
+
+
 
 
 def contactlist_handler():
@@ -408,7 +442,7 @@ def rtdma_send_handler():
             print("ERROR: %s" % e)
             run = False
             raise e
-        sleep_while_run(2)
+        sleep_while_run(1)
     print("DEBUG: rtdma_send_handler thread ended")
 
 
