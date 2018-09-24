@@ -35,7 +35,7 @@ End with an example of getting some data out of the system or using it for a lit
 * [Python3](https://www.python.org/) - Language used for the Client logic
 * [Caos-Class-Library](https://github.com/AlbianWarp/Caos-Class-Library) - Library used for client/engine communication
 * [Requests](http://docs.python-requests.org/en/master/) - HTTP Library used for almost all client/server communication
-* [socketIO-client](https://pypi.org/project/socketIO-client/) - SocketIO client library used for [socket.io](https://socket.io/) based client/server communication
+* [ws4py](https://pypi.org/project/ws4py/) - WebSocket client and server library for Python 2 and 3 as well as PyPy
 
 ## Contributing
 
@@ -49,7 +49,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Christian Stein** - *Initial work* - [KeyboardInterrupt](https://github.com/KeyboardInterrupt)
+* **KeyboardInterrupt** - *Initial work* - [KeyboardInterrupt](https://github.com/KeyboardInterrupt)
 
 See also the list of [contributors](https://github.com/AlbianWarp/AlbianWarpClient/graphs/contributors) who participated in this project.
 
