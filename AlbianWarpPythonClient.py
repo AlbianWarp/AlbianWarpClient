@@ -35,7 +35,7 @@ def read_config():
         'url': 'https://gameserver.albianwarp.com',
         'my_creatures_directory': r'C:\Users\%s\Documents\Creatures\Docking Station\My Creatures' % os.getlogin(),
         'ds_directory': r'C:\GOG Games\Creatures Exodus\Docking Station',
-        'github_game_modification_update_url': r'https://api.github.com/repos/AlbianWarp/AlbianWarpGameModifications/releases/latest',
+        'github_game_modification_update_url': r'https://gameserver.albianwarp.com/game_modifications_latest.json',
         'disable_bootstrap_auto_update': 'false',
         'disable_initial_checks': 'false'
     }
