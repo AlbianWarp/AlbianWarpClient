@@ -5,3 +5,4 @@ albianwarp.cfg
 build/
 AlbianWarpPythonClient.exe
 AlbianWarpPythonClient.spec
+bootstrap_downloads/
