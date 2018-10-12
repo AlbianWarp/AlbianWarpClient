@@ -1,8 +1,11 @@
 venv/
+venv32/
 .idea/
 __pycache__/
 albianwarp.cfg
 build/
 AlbianWarpPythonClient.exe
 AlbianWarpPythonClient.spec
+AlbianWarpPythonClient_32bit
+AlbianWarpPythonClient_64bit
 bootstrap_downloads/
