@@ -5,6 +5,9 @@ sys.path.append('.')
 clr.AddReference('CAOS')
 from CAOS import *
 from threading import Lock
+import platform
+import socket
+import os
 
 class LoggingCaosInjector(CaosInjector):
 
@@ -19,8 +22,46 @@ class LoggingCaosInjector(CaosInjector):
         self.lock.release()
         return result
 
+class LinuxCaosInjector(object):
+
+    lock = Lock()
+    host = "localhost"
+    port = int(os.popen('cat ~/.creaturesengine/port').read())
+
+
+    def ExecuteCaos(self, caos):
+        self.lock.acquire()
+        s = socket.socket()
+        s.connect((self.host, self.port))
+        s.sendall((caos + " outs \":thisworked\"\r\nrscr\r\n").encode())
+        s.shutdown(socket.SHUT_WR)
+
+        res = ""
+
+        while True:
+            data = s.recv(1024)
+            if not data:
+                break
+            res += data.decode()
+        s.close
+        
+        self.lock.release()
+
+        success = res.endswith(":thisworked")
+        content = res[:-len(":thisworked")] if success else res
+
+        mesg = lambda: None
+        mesg.Content = content
+        mesg.Success = success
+        return mesg
+
 
 CI = LoggingCaosInjector('Docking Station')
+
+# Here's where we hijack the caos injector if it's linux
+if (platform.system() == "Linux"):
+    CI = LinuxCaosInjector()
+    print("Oh, you're on linux. Hello linux friend!")
 
 
 @property
