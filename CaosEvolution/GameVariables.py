@@ -1,7 +1,7 @@
 from CaosEvolution import CI
 
-class StringGameVariable:
 
+class StringGameVariable:
     def __init__(self, variable_name):
         self.variable_name = variable_name
 
@@ -9,26 +9,26 @@ class StringGameVariable:
         CI.ExecuteCaos('sets game "%s" "%s"' % (self.variable_name, value))
 
     def _get_str_game_variable(self):
-        return str(CI.ExecuteCaos('outs game "%s"' % self.variable_name).Content.strip('\x00'))
+        return str(
+            CI.ExecuteCaos('outs game "%s"' % self.variable_name).Content.strip("\x00")
+        )
 
     Value = property(_get_str_game_variable, _set_str_game_variable)
 
 
 class IntegerGameVariable:
-
-    def __init__(self,variable_name):
+    def __init__(self, variable_name):
         self.variable_name = variable_name
-
 
     def _set_int_game_variable(self, value):
         CI.ExecuteCaos('setv game "%s" %s' % (self.variable_name, value))
 
     def _get_int_game_variable(self):
-        return int(CI.ExecuteCaos('outv game "%s"' % self.variable_name).Content.strip('\x00'))
+        return int(
+            CI.ExecuteCaos('outv game "%s"' % self.variable_name).Content.strip("\x00")
+        )
 
     Value = property(_get_int_game_variable, _set_int_game_variable)
-
-
 
 
 # region game variables
@@ -50,5 +50,5 @@ game_aw_online_indicator = IntegerGameVariable("aw_online_indicator")
 
 # region engine Variables
 # version of the ingame CAOS modifications
-eame_aw_mod_version = CI.ExecuteCaos('outs eame "aw_mod_version"').Content.strip('\x00')
+eame_aw_mod_version = CI.ExecuteCaos('outs eame "aw_mod_version"').Content.strip("\x00")
 # endregion

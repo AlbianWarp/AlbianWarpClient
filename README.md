@@ -33,9 +33,9 @@ End with an example of getting some data out of the system or using it for a lit
 ## Built With
 
 * [Python3](https://www.python.org/) - Language used for the Client logic
-* [Caos-Class-Library](https://github.com/AlbianWarp/Caos-Class-Library) - Library used for client/engine communication
 * [Requests](http://docs.python-requests.org/en/master/) - HTTP Library used for almost all client/server communication
 * [ws4py](https://pypi.org/project/ws4py/) - WebSocket client and server library for Python 2 and 3 as well as PyPy
+* [pywin32](https://pypi.org/project/pywin32/) - Provides access to Win32 APIs for handling the CAOS Injection.
 
 ## Contributing
 
