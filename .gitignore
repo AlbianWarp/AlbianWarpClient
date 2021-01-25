@@ -9,3 +9,7 @@ AlbianWarpPythonClient.spec
 AlbianWarpPythonClient_32bit
 AlbianWarpPythonClient_64bit
 bootstrap_downloads/
+
+albianwarp.cfg
+
+.vscode/

@@ -21,6 +21,7 @@ def retry(ExceptionToCheck, tries=5, delay=3, backoff=2, logger=None):
     :param logger: logger to use. If None, print
     :type logger: logging.Logger instance
     """
+
     def deco_retry(f):
         @wraps(f)
         def f_retry(*args, **kwargs):
@@ -38,5 +39,7 @@ def retry(ExceptionToCheck, tries=5, delay=3, backoff=2, logger=None):
                     mtries -= 1
                     mdelay *= backoff
             return f(*args, **kwargs)
+
         return f_retry  # true decorator
+
     return deco_retry

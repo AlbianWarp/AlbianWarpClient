@@ -1,4 +1,4 @@
 ws4py
 requests
-pythonnet
 pyinstaller
+pywin32
