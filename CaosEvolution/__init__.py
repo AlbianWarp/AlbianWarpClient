@@ -105,7 +105,7 @@ if (platform.system() == "Linux"):
                 finally:
                     h.close()
             
-            return map(lambda n: parse(os.path.join(d, n)), os.listdir(d))
+            return map(lambda n: parse(os.path.join(d, n)), filter(lambda n: n.lower().endswith(".json"), os.listdir(d)))
         
         else:
             return []
