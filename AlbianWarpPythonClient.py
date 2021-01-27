@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+import sys
 import os
 from distutils.dir_util import copy_tree
 import ssl
@@ -39,7 +42,16 @@ def read_config():
         'disable_bootstrap_auto_update': 'false',
         'disable_initial_checks': 'false'
     }
-    config.read('albianwarp.cfg')
+    f = os.path.join(os.getenv("HOME"), '.albianwarp', 'albianwarp.cfg')
+    if (not os.path.isfile(f)):
+        f = 'albianwarp.cfg'  #fallback to the old way based on the CWD of the terminal it's run from ^^'
+    if (not os.path.isfile(f)):
+        print("Missing config file "+f)
+        sys.exit(9)  #Todo handle this farther up!
+    config.read(f)
+    if (not 'albianwarp' in config):
+        print("Config file is corrupted!: "+f)
+        sys.exit(9)  #Todo handle this farther up!
     return config['albianwarp']
 
 
