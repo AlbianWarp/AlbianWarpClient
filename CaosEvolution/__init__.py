@@ -94,21 +94,20 @@ if (platform.system() == "Linux"):
     
     
     def readTLC2EInstances():
-        d = os.path.join(os.getenv("HOME"), ".tlc2e", "running")
+        def parse(f):
+            h = open(f, "r")
+            try:
+                return json.load(h)
+            finally:
+                h.close()
         
-        if (os.path.isdir(d)):
-            
-            def parse(f):
-                h = open(f, "r")
-                try:
-                    return json.load(h)
-                finally:
-                    h.close()
-            
-            return map(lambda n: parse(os.path.join(d, n)), filter(lambda n: n.lower().endswith(".json"), os.listdir(d)))
-        
-        else:
-            return []
+        r = []
+        sd = os.path.join(os.getenv("HOME"), ".tlc2e")
+        for d in [os.path.join(sd, "running"), os.path.join(sd, "running-manual")]:
+            if (os.path.isdir(d)):
+                r.extend(map(lambda n: parse(os.path.join(d, n)), filter(lambda n: n.lower().endswith(".json"), os.listdir(d))))
+        return r
+    #
     
     
     tlc2es = readTLC2EInstances()
