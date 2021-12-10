@@ -3,6 +3,7 @@ from threading import Lock
 import mmap
 import win32event
 import struct
+import time
 
 
 class CaosResult:
@@ -23,6 +24,7 @@ class SharedMemoryCaosInjector:
         self.game_name = game_name
 
     def ExecuteCaos(self, caos: str, action="execute"):
+        time.sleep(0.01)
         self.lock.acquire()
         hMutex = win32event.OpenMutex(0x1F0001, False, self.game_name + "_mutex")
         shared_memory = mmap.mmap(
