@@ -30,6 +30,8 @@ logger.setLevel("INFO")
 
 # TODO: logger does not work reliable with the current multithreading approach, investigate and replace all the
 # TODO: ugly print('') Statements with logger.info, logger.debug and so on...
+# TODO: This whole mess with multiple Threads doing different things... must be simplified massively!
+# TODO: Split this whole freaking beast up into modules!
 
 
 def read_config():
@@ -68,7 +70,7 @@ auth_token = None
 run = True
 latest_release = {}
 
-user_list=[]
+contact_list = []
 
 def sleep_while_run(seconds):
     for second in range(seconds):
@@ -508,16 +510,23 @@ def update_contact_list():
     users = s.get("%s/who_is_online" % cfg["url"], headers={"token": auth_token})
     online_users = users.json()
     for user in online_users:
-        if user not in user_list:
-            user_list.append(user)
-    for list_user in user_list:
-        if list_user not in online_users:
+        add_user_to_contact_list(user)
+    contact_list = CI.ExecuteCaos('''
+    sets va00 ""
+    loop
+      sets va00 gamn va00
+      setv va01 sins va00 1 "_contact"
+      doif va01 ne -1
+        outs "|" outs va00
+      endi
+    untl va00 eq ""
+    ''').Content.strip("\x00").split("ruso_contact|")[1].replace("_contact", "").split("|")
+    for contact in contact_list:
+        if contact not in online_users:
             status = "offline"
         else:
             status = "online"
-        #print(f"DEBUG: {list_user} is {status}")
-        add_user_to_contact_list(user)
-        CI.ExecuteCaos(f'sets game "{list_user}_status" "{status}"')
+        CI.ExecuteCaos(f'sets game "{contact}_status" "{status}"')
 
 
 def contactlist_handler():
@@ -530,7 +539,7 @@ def contactlist_handler():
             print("ERROR: %s" % e)
             run = False
             raise e
-        sleep_while_run(5)
+        sleep_while_run(10)
     print("DEBUG: contactlist_handler thread ended")
 
 
