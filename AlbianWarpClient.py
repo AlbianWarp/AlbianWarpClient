@@ -68,6 +68,7 @@ auth_token = None
 run = True
 latest_release = {}
 
+user_list=[]
 
 def sleep_while_run(seconds):
     for second in range(seconds):
@@ -504,11 +505,19 @@ def dma_receive_handler():
 
 @retry(Exception)
 def update_contact_list():
-    users = s.get("%s/user" % cfg["url"], headers={"token": auth_token})
-    for user, status in users.json():
-        # print("DEBUG: %s is %s " % (user, status))
+    users = s.get("%s/who_is_online" % cfg["url"], headers={"token": auth_token})
+    online_users = users.json()
+    for user in online_users:
+        if user not in user_list:
+            user_list.append(user)
+    for list_user in user_list:
+        if list_user not in online_users:
+            status = "offline"
+        else:
+            status = "online"
+        #print(f"DEBUG: {list_user} is {status}")
         add_user_to_contact_list(user)
-        CI.ExecuteCaos('sets game "%s_status" "%s"' % (user, status))
+        CI.ExecuteCaos(f'sets game "{list_user}_status" "{status}"')
 
 
 def contactlist_handler():
