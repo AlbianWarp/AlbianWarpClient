@@ -9,6 +9,7 @@ AlbianWarpClient_32bit/
 bootstrap_downloads/
 *.exe
 *.spec
+*.zip
 
 albianwarp.cfg
 
