@@ -72,6 +72,7 @@ latest_release = {}
 
 contact_list = []
 
+
 def sleep_while_run(seconds):
     for second in range(seconds):
         if not run:
@@ -511,7 +512,9 @@ def update_contact_list():
     online_users = users.json()
     for user in online_users:
         add_user_to_contact_list(user)
-    contact_list = CI.ExecuteCaos('''
+    contact_list = (
+        CI.ExecuteCaos(
+            """
     sets va00 ""
     loop
       sets va00 gamn va00
@@ -520,7 +523,13 @@ def update_contact_list():
         outs "|" outs va00
       endi
     untl va00 eq ""
-    ''').Content.strip("\x00").split("ruso_contact|")[1].replace("_contact", "").split("|")
+    """
+        )
+        .Content.strip("\x00")
+        .split("ruso_contact|")[1]
+        .replace("_contact", "")
+        .split("|")
+    )
     for contact in contact_list:
         if contact not in online_users:
             status = "offline"
