@@ -4,8 +4,12 @@ venv32/
 __pycache__/
 albianwarp.cfg
 build/
-AlbianWarpPythonClient.exe
-AlbianWarpPythonClient.spec
-AlbianWarpPythonClient_32bit
-AlbianWarpPythonClient_64bit
+AlbianWarpClient_64bit/
+AlbianWarpClient_32bit/
 bootstrap_downloads/
+*.exe
+*.spec
+
+albianwarp.cfg
+
+.vscode/

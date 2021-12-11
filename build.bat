@@ -1,6 +1,6 @@
-venv\Scripts\pyinstaller.exe --add-data CAOS.dll;. --onefile AlbianWarpPythonClient.py --icon aw.ico --distpath AlbianWarpPythonClient_64bit/
+venv\Scripts\pyinstaller.exe --onefile AlbianWarpClient.py --icon aw.ico --distpath AlbianWarpClient_64bit/
 rm -rf build
-venv32\Scripts\pyinstaller.exe --add-data CAOS.dll;. --onefile AlbianWarpPythonClient.py --icon aw.ico --distpath AlbianWarpPythonClient_32bit/
+venv32\Scripts\pyinstaller.exe --onefile AlbianWarpClient.py --icon aw.ico --distpath AlbianWarpClient_32bit/
 rm -rf build
-copy "albianwarp.cfg" "AlbianWarpPythonClient_64bit/albianwarp.cfg"
-copy "albianwarp.cfg" "AlbianWarpPythonClient_32bit/albianwarp.cfg"
+copy "example_albianwarp.cfg" "AlbianWarpClient_64bit/albianwarp.cfg"
+copy "example_albianwarp.cfg" "AlbianWarpClient_32bit/albianwarp.cfg"
