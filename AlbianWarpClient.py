@@ -526,11 +526,10 @@ def update_contact_list():
     """
         )
         .Content.strip("\x00")
-        .split("ruso_contact|")[1]
-        .replace("_contact", "")
-        .split("|")
+        .replace("|!friend_contact|!net: ruso_contact|","").replace("_contact", "").split("|")
     )
     for contact in contact_list:
+        print(contact)
         if contact not in online_users:
             status = "offline"
         else:
