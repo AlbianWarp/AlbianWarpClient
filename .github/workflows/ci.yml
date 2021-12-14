@@ -32,5 +32,6 @@ jobs:
         dir
         C:\hostedtoolcache\windows\Python\3.10.0\x86\python.exe  -m venv venv32
         C:\hostedtoolcache\windows\Python\3.10.0\x64\python.exe  -m venv venv
+        dir
     - name: run build.ps1
       run: ./build.ps1
