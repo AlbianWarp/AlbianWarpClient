@@ -32,6 +32,9 @@ jobs:
         dir
         C:\hostedtoolcache\windows\Python\3.10.0\x86\python.exe  -m venv venv32
         C:\hostedtoolcache\windows\Python\3.10.0\x64\python.exe  -m venv venv
-        dir
+    - name: install dependencies
+      run: |
+        venv/Scripts/python.exe -m pip install -r requirements.txt
+        venv32/Scripts/python.exe -m pip install -r requirements.txt
     - name: run build.ps1
       run: ./build.ps1
