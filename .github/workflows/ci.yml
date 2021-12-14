@@ -28,4 +28,8 @@ jobs:
     - name: output python x64 version
       run: C:\hostedtoolcache\windows\Python\3.10.0\x64\python.exe --version
     - name: create venv
-      run: python.exe -m venv venv
+      run: |
+        C:\hostedtoolcache\windows\Python\3.10.0\x86\python.exe  -m venv venv32
+        C:\hostedtoolcache\windows\Python\3.10.0\x64\python.exe  -m venv venv
+    - name: run build.ps1
+      run: ./build.ps1
