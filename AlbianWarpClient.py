@@ -543,7 +543,6 @@ def update_contact_list():
         .split("|")
     )
     for contact in contact_list:
-        print(contact)
         if contact not in online_users:
             status = "offline"
         else:
