@@ -61,7 +61,6 @@ class IntegerEngineVariable:
     Value = property(_get_int_eame_variable, _set_int_eame_variable)
 
 
-
 # region game variables
 # Game Variables used by AlbianWarp
 # Original game variables start with the prefix "game_" followed by their name.

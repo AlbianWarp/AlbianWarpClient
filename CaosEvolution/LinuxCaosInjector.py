@@ -17,6 +17,7 @@ class CaosInjectionResponse(object):
         self.Content = content
         self.Success = success
 
+
 class LinuxCaosInjector(object):
 
     lock = Lock()
@@ -55,6 +56,7 @@ class LinuxCaosInjector(object):
 
         return CaosInjectionResponse(content, success)
 
+
 def tryPort(port):
     try:
         i = LinuxCaosInjector(port)
@@ -65,6 +67,7 @@ def tryPort(port):
         return False
 
     return r.Success and r.Content == "81"
+
 
 ParseError = object()
 
@@ -91,6 +94,7 @@ else:
 
 showHiddens = True  # Todo softcode this from a CLI argument!
 
+
 def readTLC2EInstances():
     def parse(f):
         h = open(f, "r")
@@ -110,6 +114,7 @@ def readTLC2EInstances():
                 )
             )
     return r
+
 
 #
 
@@ -134,6 +139,7 @@ if not showHiddens:
 # construct the menu :3
 
 Default = object()
+
 
 def formatTLC2EInstance(t):
     d = t["e6b02a88-7311-4a27-bbb7-d8f3a2d4e353"]
@@ -185,6 +191,7 @@ def formatTLC2EInstance(t):
         r += ")"
 
     return r
+
 
 #
 
@@ -253,9 +260,7 @@ if len(menu) == 0:
             + str(DefaultPort)
             + ", but couldn't find an engine on it!"
         )
-        print(
-            "So I have no idea which engine to connect to if one is even running :["
-        )
+        print("So I have no idea which engine to connect to if one is even running :[")
         sys.exit(32)
 
 elif len(menu) == 1:

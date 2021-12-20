@@ -20,7 +20,7 @@ class AgentBuilder:
         )
         for key, value in self.data.items():
             if type(value) in [float, int]:
-                self.caos += 'setv name "%s" %s\n' % (key, value)
+                self.caos += f'setv name "{key}" {value}\n'
             if type(value) == str:
                 self.caos += 'sets name "%s" "%s"\n' % (key, value.replace("\n", r"\n"))
         return CI.ExecuteCaos(self.caos)
@@ -28,14 +28,10 @@ class AgentBuilder:
 
 def enumAgents(family, genus, species):
     tmp = list()
-    result = CI.ExecuteCaos(
-        'enum %s %s %s outv unid outs "|" next' % (family, genus, species)
-    )
+    result = CI.ExecuteCaos(f'enum {family} {genus} {species} outv unid outs "|" next')
     if result.Content.strip("|\x00").strip() != "":
         for unid in result.Content.strip("|\x00").split("|"):
-            logging.debug(
-                "enumerated %s %s %s  - unid: %s" % (family, genus, species, unid)
-            )
+            logging.debug(f"enumerated {family} {genus} {species}  - unid: {unid}")
             tmp.append(Agent(unid))
     return tmp
 
@@ -47,25 +43,25 @@ class Agent:
     @property
     def species(self):
         return int(
-            CI.ExecuteCaos("targ agnt %s outv spcs" % self.unid).Content.strip("\x00")
+            CI.ExecuteCaos(f"targ agnt {self.unid} outv spcs").Content.strip("\x00")
         )
 
     @property
     def family(self):
         return int(
-            CI.ExecuteCaos("targ agnt %s outv fmly" % self.unid).Content.strip("\x00")
+            CI.ExecuteCaos(f"targ agnt {self.unid} outv fmly").Content.strip("\x00")
         )
 
     @property
     def genus(self):
         return int(
-            CI.ExecuteCaos("targ agnt %s outv gnus" % self.unid).Content.strip("\x00")
+            CI.ExecuteCaos(f"targ agnt {self.unid} outv gnus").Content.strip("\x00")
         )
 
     def Kill(self):
-        result = CI.ExecuteCaos("kill agnt %s" % self.unid)
+        result = CI.ExecuteCaos(f"kill agnt {self.unid}")
         if not result.Success:
-            raise Exception("Could not Kill Agent!\n %s" % result.Content)
+            raise Exception(f"Could not Kill Agent!\n {result.Content}")
 
     def GetOV(self, xx):
         if xx not in range(0, 100):
@@ -91,23 +87,23 @@ class Agent:
             CI.ExecuteCaos('targ agnt %s sets ov%02d "%s"' % (self.unid, xx, value))
 
     def GetNAME(self, xx):
-        result = CI.ExecuteCaos('targ agnt %s outv type name "%s"' % (self.unid, xx))
+        result = CI.ExecuteCaos(f'targ agnt {self.unid} outv type name "{xx}"')
         if int(result.Content.strip("\x00")) in [0, 1]:
             return int(
-                CI.ExecuteCaos(
-                    'targ agnt %s outv name "%s"' % (self.unid, xx)
-                ).Content.strip("\x00")
+                CI.ExecuteCaos(f'targ agnt {self.unid} outv name "{xx}"').Content.strip(
+                    "\x00"
+                )
             )
         elif int(result.Content.strip("\x00")) in [2]:
             return CI.ExecuteCaos(
-                'targ agnt %s outs name "%s"' % (self.unid, xx)
+                f'targ agnt {self.unid} outs name "{xx}"'
             ).Content.strip("\x00")
 
     def SetNAME(self, xx, value):
         if type(value) in [int, float]:
-            CI.ExecuteCaos('targ agnt %s setv name "%s" %s' % (self.unid, xx, value))
+            CI.ExecuteCaos(f'targ agnt {self.unid} setv name "{xx}" {value}')
         elif type(value) == str:
-            CI.ExecuteCaos('targ agnt %s sets name "%s" "%s"' % (self.unid, xx, value))
+            CI.ExecuteCaos(f'targ agnt {self.unid} sets name "{xx}" "{value}"')
 
     @property
     def _json(self):

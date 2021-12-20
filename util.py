@@ -34,7 +34,7 @@ def retry(ExceptionToCheck, tries=5, delay=3, backoff=2, logger=None):
                     if logger:
                         logger.warning(msg)
                     else:
-                        print("RETRY: %s" % msg)
+                        print(f"RETRY: {msg}")
                     time.sleep(mdelay)
                     mtries -= 1
                     mdelay *= backoff

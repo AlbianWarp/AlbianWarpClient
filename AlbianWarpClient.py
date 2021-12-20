@@ -96,17 +96,17 @@ def consumer(message, websocket):
     try:
         data = json.loads(str(message))
         if "ping" in data:
-            websocket.send(json.dumps({"pong": "%s" % data["ping"]}))
+            websocket.send(json.dumps({"pong": f"{data['ping']}"}))
         if "aw_sender" in data:
             print("received a RTDMA")
             try:
                 if AgentBuilder(1, 1, 35756, data).inject().Success:
-                    print("DEBUG: INJECTED incoming RTDMA: %s" % data)
+                    print(f"DEBUG: INJECTED incoming RTDMA: {data}")
             except Exception as e:
-                print("ERROR: %s" % e)
+                print(f"ERROR: {e}")
     except Exception as e:
         print(message)
-        print("NOT JSON! %s" % e)
+        print(f"NOT JSON! {e}")
 
 
 class AwSocketClient(WebSocketClient):
@@ -145,7 +145,7 @@ def download_latest_game_modifications():
     global latest_release
     latest_release = s.get(cfg["github_game_modification_update_url"]).json()
     print(
-        'Latest available GameModification Version is "%s"' % latest_release["tag_name"]
+        f"Latest available GameModification Version is \"{latest_release['tag_name']}\""
     )
     bootstrap_download_dir = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "bootstrap_downloads"
@@ -153,7 +153,7 @@ def download_latest_game_modifications():
     if not os.path.exists(bootstrap_download_dir):
         os.makedirs(bootstrap_download_dir)
     if not os.path.isfile(
-        os.path.join(bootstrap_download_dir, "%s.zip" % latest_release["tag_name"])
+        os.path.join(bootstrap_download_dir, f"{latest_release['tag_name']}.zip")
     ):
         print(
             'downloading AlbianWarpGameModifications Version "%s"'
@@ -161,7 +161,7 @@ def download_latest_game_modifications():
         )
         r = requests.get(latest_release["zipball_url"], stream=True)
         with open(
-            os.path.join(bootstrap_download_dir, "%s.zip" % latest_release["tag_name"]),
+            os.path.join(bootstrap_download_dir, f"{latest_release['tag_name']}.zip"),
             "wb",
         ) as f:
             for chunk in r.iter_content(chunk_size=1024):
@@ -176,7 +176,7 @@ def download_latest_game_modifications():
         os.path.join(bootstrap_download_dir, latest_release["tag_name"])
     ):
         with zipfile.ZipFile(
-            os.path.join(bootstrap_download_dir, "%s.zip" % latest_release["tag_name"]),
+            os.path.join(bootstrap_download_dir, f"{latest_release['tag_name']}.zip"),
             "r",
         ) as z:
             print(
@@ -186,7 +186,7 @@ def download_latest_game_modifications():
             files_to_extract = [
                 file
                 for file in z.namelist()
-                if file.startswith("%sBootstrap/" % z.namelist()[0])
+                if file.startswith(f"{z.namelist()[0]}Bootstrap/")
             ]
             z.extractall(
                 os.path.join(bootstrap_download_dir, latest_release["tag_name"]),
@@ -278,7 +278,7 @@ def main():
 
 def initial_checks():
     server_version = "beta baboon"
-    print('DEBUG: My Creatures directory: "%s"' % cfg["my_creatures_directory"])
+    print(f"DEBUG: My Creatures directory: \"{cfg['my_creatures_directory']}\"")
     print("DEBUG: Checking Bootstrap version...")
     if eame_aw_mod_version == "":
         print("ERROR: Game modifications are not Installed! :(")
@@ -290,7 +290,7 @@ def initial_checks():
         )
         exit(1)
     print("DEBUG: Checking server version...")
-    actual_version = s.get("%s/version" % cfg["url"]).text
+    actual_version = s.get(f"{cfg['url']}/version").text
     if actual_version != server_version:
         print(
             "ERROR: Server and Client Version mismatch, are you running the latest/correct client version?"
@@ -305,14 +305,14 @@ def initial_checks():
 def verify_login_credentials():
     global auth_token
     auth_test = s.post(
-        "%s/auth" % cfg["url"],
+        f"{cfg['url']}/auth",
         json={"username": cfg["username"], "password": cfg["password"]},
     )
     while auth_test.status_code != 200:
         cfg["username"] = input("Please enter your username: ")
         cfg["password"] = input("Please enter your password: ")
         auth_test = s.post(
-            "%s/auth" % cfg["url"],
+            f"{cfg['url']}/auth",
             json={"username": cfg["username"], "password": cfg["password"]},
         )
         if auth_test.status_code != 200:
@@ -324,21 +324,20 @@ def verify_login_credentials():
 @retry(Exception)
 def send_creature(agent):
     tmp = agent.dict
-    print("DETECTED SCA: %s" % agent.unid)
-    print("DEBUG: Processing  %s" % tmp)
+    print(f"DETECTED SCA: {agent.unid}")
+    print(f"DEBUG: Processing  {tmp}")
     if tmp["creature_name"] != "":
         creature_file = os.path.join(
             cfg["my_creatures_directory"],
-            "%s_%s.ds.creature"
-            % (tmp["creature_name"], tmp["moniker"].replace("-", "_")),
+            f"{tmp['creature_name']}_{tmp['moniker'].replace('-', '_')}.ds.creature",
         )
     else:
         creature_file = os.path.join(
             cfg["my_creatures_directory"],
-            "%s.ds.creature" % tmp["moniker"].replace("-", "_"),
+            f"{tmp['moniker'].replace('-', '_')}.ds.creature",
         )
     if os.path.isfile(creature_file):
-        print('DEBUG: Found creature to warp at "%s"' % creature_file)
+        print(f'DEBUG: Found creature to warp at "{creature_file}"')
         with open(creature_file, "rb") as f:
             files = {"file": f}
             values = {
@@ -346,7 +345,7 @@ def send_creature(agent):
                 "creature_name": tmp["creature_name"],
             }
             result = s.post(
-                "%s/creature" % cfg["url"],
+                f"{cfg['url']}/creature",
                 files=files,
                 data=values,
                 headers={"token": auth_token},
@@ -357,32 +356,30 @@ def send_creature(agent):
                 % (tmp["moniker"], tmp["aw_recipient"], result.status_code)
             )
         else:
-            print("uploaded creature %s to %s" % (tmp["moniker"], tmp["aw_recipient"]))
+            print(f"uploaded creature {tmp['moniker']} to {tmp['aw_recipient']}")
         print(delete_creature_by_moniker(tmp["moniker"]))
         time.sleep(1)
         if not os.path.isfile(creature_file):
-            print('Deleted creature file "%s" after succesfull upload' % creature_file)
+            print(f'Deleted creature file "{creature_file}" after succesfull upload')
         else:
             print(
                 'COULD NOT delete creature file "%s" after successful upload!'
                 % creature_file
             )
     else:
-        print("ERROR: Could not find %s" % creature_file)
+        print(f"ERROR: Could not find {creature_file}")
     agent.Kill()
 
 
 @retry(Exception)
 def download_creatures():
     # print("DEBUG: requesting available creatures")
-    available_creatures = s.get(
-        "%s/creature" % cfg["url"], headers={"token": auth_token}
-    )
+    available_creatures = s.get(f"{cfg['url']}/creature", headers={"token": auth_token})
     if available_creatures.status_code == 200:
         for creature in available_creatures.json()["creatures"]:
-            print("found creature %s" % creature["filename"])
+            print(f"found creature {creature['filename']}")
             result = s.get(
-                "%s/creature/%s" % (cfg["url"], creature["id"]),
+                f"{cfg['url']}/creature/{creature['id']}",
                 headers={"token": auth_token},
             )
             if result.status_code == 200:
@@ -393,10 +390,10 @@ def download_creatures():
                     file.write(result.content)
             else:
                 raise Exception(
-                    "Creature upload Failed! Status Code: %s" % result.status_code
+                    f"Creature upload Failed! Status Code: {result.status_code}"
                 )
             s.delete(
-                "%s/creature/%s" % (cfg["url"], creature["id"]),
+                f"{cfg['url']}/creature/{creature['id']}",
                 headers={"token": auth_token},
             )
     else:
@@ -413,7 +410,7 @@ def creature_download_handler():
         try:
             download_creatures()
         except Exception as e:
-            print("ERROR: %s" % e)
+            print(f"ERROR: {e}")
             run = False
             raise e
         sleep_while_run(50)
@@ -433,7 +430,7 @@ def creature_upload_handler():
                     send_creature(agent)
                     CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
         except Exception as e:
-            print("ERROR: %s" % e)
+            print(f"ERROR: {e}")
             run = False
             raise e
         sleep_while_run(5)
@@ -443,13 +440,13 @@ def creature_upload_handler():
 @retry(Exception)
 def send_dma(agent):
     tmp = agent.dict
-    print("DETECTED outgoing DMA: %s" % agent.unid)
-    print("DEBUG: Processing %s" % tmp)
-    result = s.post("%s/message" % cfg["url"], headers={"token": auth_token}, json=tmp)
+    print(f"DETECTED outgoing DMA: {agent.unid}")
+    print(f"DEBUG: Processing {tmp}")
+    result = s.post(f"{cfg['url']}/message", headers={"token": auth_token}, json=tmp)
     if result.status_code == 200:
-        print("SENT DMA (%s)" % agent.unid)
+        print(f"SENT DMA ({agent.unid})")
     else:
-        print("Could not send DMA, Status Code: %s" % result.status_code)
+        print(f"Could not send DMA, Status Code: {result.status_code}")
     agent.Kill()
 
 
@@ -466,7 +463,7 @@ def dma_send_handler():
                     send_dma(agent)
                     CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
         except Exception as e:
-            print("ERROR: %s" % e)
+            print(f"ERROR: {e}")
             run = False
             raise e
         sleep_while_run(5)
@@ -476,28 +473,28 @@ def dma_send_handler():
 @retry(Exception)
 def receive_dmas():
     # print("DEBUG: requesting available DMA's")
-    available_messages = s.get("%s/message" % cfg["url"], headers={"token": auth_token})
+    available_messages = s.get(f"{cfg['url']}/message", headers={"token": auth_token})
     if available_messages.status_code == 200:
         for message_id in available_messages.json()["messages"]:
             message = s.get(
-                "%s/message/%s" % (cfg["url"], message_id),
+                f"{cfg['url']}/message/{message_id}",
                 headers={"token": auth_token},
             ).json()
             CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1004 next")
             try:
                 if AgentBuilder(1, 1, 35754, message).inject().Success:
-                    print("INJECTED incoming DMA: %s" % message)
+                    print(f"INJECTED incoming DMA: {message}")
             except Exception as e:
-                print("ERROR: %s" % e)
+                print(f"ERROR: {e}")
             finally:
                 if (
                     not s.delete(
-                        "%s/message/%s" % (cfg["url"], message_id),
+                        f"{cfg['url']}/message/{message_id}",
                         headers={"token": auth_token},
                     ).status_code
                     == 200
                 ):
-                    print("ERROR: could not delete message %s" % message)
+                    print(f"ERROR: could not delete message {message}")
             CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
 
 
@@ -520,7 +517,7 @@ def dma_receive_handler():
 
 @retry(Exception)
 def update_contact_list():
-    users = s.get("%s/who_is_online" % cfg["url"], headers={"token": auth_token})
+    users = s.get(f"{cfg['url']}/who_is_online", headers={"token": auth_token})
     online_users = users.json()
     for user in online_users:
         add_user_to_contact_list(user)
@@ -557,7 +554,7 @@ def contactlist_handler():
         try:
             update_contact_list()
         except Exception as e:
-            print("ERROR: %s" % e)
+            print(f"ERROR: {e}")
             run = False
             raise e
         sleep_while_run(10)
@@ -567,10 +564,10 @@ def contactlist_handler():
 @retry(Exception)
 def send_rtdma(agent):
     tmp = agent.dict
-    print("DETECTED outgoing RTDMA: %s" % agent.unid)
-    print("DEBUG: Processing %s" % tmp)
+    print(f"DETECTED outgoing RTDMA: {agent.unid}")
+    print(f"DEBUG: Processing {tmp}")
     ws.send(json.dumps(tmp))
-    print("SENT RTDMA (%s)" % agent.unid)
+    print(f"SENT RTDMA ({agent.unid})")
     agent.Kill()
 
 
@@ -587,7 +584,7 @@ def rtdma_send_handler():
                     send_rtdma(agent)
                     CI.ExecuteCaos("enum 1 2 14 mesg writ targ 1005 next")
         except Exception as e:
-            print("ERROR: %s" % e)
+            print(f"ERROR: {e}")
             run = False
             raise e
         sleep_while_run(1)
