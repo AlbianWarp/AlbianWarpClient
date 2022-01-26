@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+import sys
 import os
 from distutils.dir_util import copy_tree
 import ssl
@@ -48,7 +51,16 @@ def read_config():
         "disable_bootstrap_auto_update": "false",
         "disable_initial_checks": "false",
     }
-    config.read("albianwarp.cfg")
+    f = os.path.join(os.getenv("HOME", ""), ".albianwarp", "albianwarp.cfg")
+    if not os.path.isfile(f):
+        f = "albianwarp.cfg"  # fallback to the old way based on the CWD of the terminal it's run from ^^'
+    if not os.path.isfile(f):
+        print(f"Missing config file {f}")
+        sys.exit(1)
+    config.read(f)
+    if not "albianwarp" in config:
+        print(f"Config file is corrupted!: {f}")
+        sys.exit(1)
     return config["albianwarp"]
 
 
@@ -526,9 +538,12 @@ def update_contact_list():
     """
         )
         .Content.strip("\x00")
-        .replace("|!friend_contact|!net: ruso_contact|","").replace("_contact", "").split("|")
+        .replace("|!friend_contact|!net: ruso_contact|", "")
+        .replace("_contact", "")
+        .split("|")
     )
     for contact in contact_list:
+        print(contact)
         if contact not in online_users:
             status = "offline"
         else:
