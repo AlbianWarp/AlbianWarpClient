@@ -37,3 +37,7 @@ jobs:
         venv32/Scripts/python.exe -m pip install -r requirements.txt
     - name: run build.ps1
       run: ./build.ps1
+    - uses: actions/upload-artifact@v3
+      with:
+        name: upload-artifact
+        path: AlbianWarpClient_*.zip
