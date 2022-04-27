@@ -343,7 +343,7 @@ else:
             shared_memory.seek(24)
             shared_memory.write(b"execute\n" + caos + b"\n")
             win32event.SetEvent(request_event_handler)
-            win32event.WaitForSingleObject(result_event_handler, 1000)
+            win32event.WaitForSingleObject(result_event_handler, win32event.INFINITE)
             shared_memory.seek(0)
             _, process_id, result_code, result_length, _, _ = struct.unpack(
                 "4sIIIII", shared_memory.read(24)
