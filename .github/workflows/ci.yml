@@ -1,4 +1,4 @@
-name: Test
+name: Build & Test
 on:
   pull_request:
     types: [opened, synchronize]
@@ -6,7 +6,7 @@ on:
       - master
       - main
 jobs:
-  test:
+  build:
     runs-on: windows-latest
     steps:
     - name: Checkout
@@ -16,24 +16,28 @@ jobs:
     - name: Set up Python x64
       uses: actions/setup-python@v2
       with:
-        python-version: "3.10"
+        python-version: "3.9"
         architecture: "x64"
     - name: Set up Python x86
       uses: actions/setup-python@v2
       with:
-        python-version: "3.10"
+        python-version: "3.9.12"
         architecture: "x86"
     - name: output python x86 version
-      run: C:\hostedtoolcache\windows\Python\3.10.0\x86\python.exe --version
+      run: C:\hostedtoolcache\windows\Python\3.9.12\x86\python.exe --version
     - name: output python x64 version
-      run: C:\hostedtoolcache\windows\Python\3.10.0\x64\python.exe --version
+      run: C:\hostedtoolcache\windows\Python\3.9.12\x64\python.exe --version
     - name: create venv
       run: |
-        C:\hostedtoolcache\windows\Python\3.10.0\x86\python.exe  -m venv venv32
-        C:\hostedtoolcache\windows\Python\3.10.0\x64\python.exe  -m venv venv
+        C:\hostedtoolcache\windows\Python\3.9.12\x86\python.exe  -m venv venv32
+        C:\hostedtoolcache\windows\Python\3.9.12\x64\python.exe  -m venv venv
     - name: install dependencies
       run: |
         venv/Scripts/python.exe -m pip install -r requirements.txt
         venv32/Scripts/python.exe -m pip install -r requirements.txt
     - name: run build.ps1
       run: ./build.ps1
+    - uses: actions/upload-artifact@v3
+      with:
+        name: AlbianWarpClients
+        path: AlbianWarpClient_*.zip
