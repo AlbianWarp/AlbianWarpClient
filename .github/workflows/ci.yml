@@ -1,4 +1,4 @@
-name: Test
+name: Build & Test
 on:
   pull_request:
     types: [opened, synchronize]
@@ -6,7 +6,7 @@ on:
       - master
       - main
 jobs:
-  test:
+  build:
     runs-on: windows-latest
     steps:
     - name: Checkout
@@ -39,5 +39,5 @@ jobs:
       run: ./build.ps1
     - uses: actions/upload-artifact@v3
       with:
-        name: upload-artifact
+        name: AlbianWarpClients
         path: AlbianWarpClient_*.zip
