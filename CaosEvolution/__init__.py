@@ -330,6 +330,7 @@ else:
             time.sleep(0.01)
             self.lock.acquire()
             hMutex = win32event.OpenMutex(0x1F0001, False, self.game_name + "_mutex")
+            win32event.WaitForSingleObject(hMutex, win32event.INFINITE)
             shared_memory = mmap.mmap(
                 0, self.shared_memory_size, self.game_name + "_mem", mmap.ACCESS_WRITE
             )
@@ -351,6 +352,7 @@ else:
             result = shared_memory.read(result_length)
             shared_memory.seek(24)
             shared_memory.write(b"\x00" * (result_length + len(caos) + 9))
+            win32event.ReleaseMutex(hMutex)
             hMutex.Close()
             self.lock.release()
             return CaosResult(
